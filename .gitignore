@@ -15,6 +15,9 @@ installer/python-embed-optimized/
 dist/**/*.zip
 dist/**/*.exe
 
+# Python installer (uploaded separately to GitHub Release)
+python-installer.exe
+
 # Desktop app
 _desktop/
 desktop/

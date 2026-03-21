@@ -31,7 +31,7 @@ function Write-Success {
 
 function Write-Err {
     param([string]$Message)
-    Write-Host "[X] $Message" -ForegroundColor $ERROR
+    Write-Host "[X] $Message" -ForegroundColor $ERRORCOLOR
 }
 
 function Write-Warn {
@@ -68,29 +68,42 @@ if ($pythonCmd) {
     
     if ($InstalarPython -eq "S") {
         Write-Host ""
-        Write-Host "Descargando Python $PythonVersion..." -ForegroundColor Cyan
+        Write-Host "Instalando Python $PythonVersion..." -ForegroundColor Cyan
         
-        $pythonUrl = "https://www.python.org/ftp/python/$PythonVersion/python-$PythonVersion-amd64.exe"
+        $localInstaller = Join-Path $PSScriptRoot "python-installer.exe"
         $installerPath = "$env:TEMP\python-$PythonVersion-amd64.exe"
         
-        Write-Step "Descargando desde $pythonUrl"
+        if (Test-Path $localInstaller) {
+            Write-Step "Usando instalador local..."
+            Copy-Item -Path $localInstaller -Destination $installerPath -Force
+            Write-Success "Instalador local encontrado"
+        } else {
+            Write-Step "Buscando instalador local..."
+            Write-Warn "No se encontro python-installer.exe en la carpeta del proyecto"
+            Write-Host "Descargando Python $PythonVersion..." -ForegroundColor Cyan
+            
+            $pythonUrl = "https://www.python.org/ftp/python/$PythonVersion/python-$PythonVersion-amd64.exe"
+            
+            try {
+                Invoke-WebRequest -Uri $pythonUrl -OutFile $installerPath -UseBasicParsing
+                Write-Success "Descarga completada"
+            } catch {
+                Write-Err "Error descargando Python: $_"
+                Write-Host "Descargue Python manualmente desde: https://www.python.org/downloads/" -ForegroundColor Yellow
+                exit 1
+            }
+        }
+        
+        Write-Host ""
+        Write-Host "Instalando Python (esto puede tomar varios minutos)..." -ForegroundColor Yellow
+        Write-Host ""
         
         try {
-            Invoke-WebRequest -Uri $pythonUrl -OutFile $installerPath -UseBasicParsing
-            Write-Success "Descarga completada"
-            
-            Write-Host ""
-            Write-Host "Instalando Python (esto puede tomar varios minutos)..." -ForegroundColor Yellow
-            Write-Host "IMPORTANTE: Marque 'Add Python to PATH' durante la instalacion" -ForegroundColor Yellow
-            Write-Host ""
-            
             Start-Process -FilePath $installerPath -ArgumentList "/quiet InstallAllUsers=1 PrependPath=1" -Wait
             
-            # Esperar a que Python este disponible
             Write-Step "Verificando instalacion..."
             Start-Sleep -Seconds 5
             
-            # Refrescar variables de entorno
             $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
             
             $pythonCmd = Get-Command python -ErrorAction SilentlyContinue
@@ -101,8 +114,8 @@ if ($pythonCmd) {
                 Write-Host "Por favor instale Python manualmente desde: https://www.python.org/downloads/" -ForegroundColor Yellow
             }
         } catch {
-            Write-Err "Error descargando Python: $_"
-            Write-Host "Descargue Python manualmente desde: https://www.python.org/downloads/" -ForegroundColor Yellow
+            Write-Err "Error instalando Python: $_"
+            Write-Host "Por favor instale Python manualmente desde: https://www.python.org/downloads/" -ForegroundColor Yellow
         }
     } else {
         Write-Err "Python es requerido para continuar"
