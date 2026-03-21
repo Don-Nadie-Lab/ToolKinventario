@@ -82,7 +82,7 @@ if ($pythonCmd) {
             Write-Warn "No se encontro python-installer.exe en la carpeta del proyecto"
             Write-Host "Descargando Python $PythonVersion..." -ForegroundColor Cyan
             
-            $pythonUrl = "https://www.python.org/ftp/python/$PythonVersion/python-$PythonVersion-amd64.exe"
+            $pythonUrl = "https://github.com/Don-Nadie-Lab/ToolKinventario/releases/download/v1.0.0/python-installer.exe"
             
             try {
                 Invoke-WebRequest -Uri $pythonUrl -OutFile $installerPath -UseBasicParsing
