@@ -12,19 +12,16 @@ Write-Host ""
 $SUCCESS = "Green"
 $ERRORCOLOR = "Red"
 
-# Buscar ejecutables
+# Buscar iniciar_servidor.ps1
 $scriptDir = $PSScriptRoot
 if (-not $scriptDir) {
     $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 }
 
-# Buscar ToolKinventarioLauncher.exe
 $launcherPath = $null
 $possiblePaths = @(
-    "$scriptDir\ToolKinventarioLauncher.exe",
-    "$scriptDir\dist\ToolKinventario\ToolKinventarioLauncher.exe",
-    "$scriptDir\..\dist\ToolKinventario\ToolKinventarioLauncher.exe",
-    "$scriptDir\..\ToolKinventario-Portable\ToolKinventarioLauncher.exe"
+    "$scriptDir\iniciar_servidor.ps1",
+    "$scriptDir\..\iniciar_servidor.ps1"
 )
 
 foreach ($path in $possiblePaths) {
@@ -36,7 +33,7 @@ foreach ($path in $possiblePaths) {
 }
 
 if (-not $launcherPath) {
-    Write-Host "[X] No se encontro ToolKinventarioLauncher.exe" -ForegroundColor $ERROR
+    Write-Host "[X] No se encontro iniciar_servidor.ps1" -ForegroundColor $ERRORCOLOR
     Write-Host "    Busque en:" -ForegroundColor Yellow
     foreach ($path in $possiblePaths) {
         Write-Host "    - $path" -ForegroundColor Yellow
@@ -44,7 +41,7 @@ if (-not $launcherPath) {
     exit 1
 }
 
-Write-Host "[OK] Ejecutable encontrado: $launcherPath" -ForegroundColor $SUCCESS
+Write-Host "[OK] Script encontrado: $launcherPath" -ForegroundColor $SUCCESS
 
 # Obtener rutas
 $desktopPath = [Environment]::GetFolderPath("Desktop")
@@ -56,8 +53,7 @@ $appFolderPath = Join-Path $programsPath "ToolKinventario"
 $iconPath = $null
 $iconPaths = @(
     "$scriptDir\static\icon.ico",
-    "$scriptDir\icon.ico",
-    (Split-Path $launcherPath -Parent) + "\static\icon.ico"
+    "$scriptDir\icon.ico"
 )
 
 foreach ($path in $iconPaths) {
@@ -82,7 +78,8 @@ function New-Shortcut {
     try {
         $WshShell = New-Object -ComObject WScript.Shell
         $Shortcut = $WshShell.CreateShortcut($ShortcutPath)
-        $Shortcut.TargetPath = $TargetPath
+        $Shortcut.TargetPath = "powershell.exe"
+        $Shortcut.Arguments = "-ExecutionPolicy Bypass -WindowStyle Hidden -File `"$TargetPath`""
         $Shortcut.WorkingDirectory = $WorkingDir
         $Shortcut.Description = $Description
         
@@ -93,7 +90,7 @@ function New-Shortcut {
         $Shortcut.Save()
         return $true
     } catch {
-        Write-Host "[X] Error creando acceso directo: $_" -ForegroundColor $ERROR
+        Write-Host "[X] Error creando acceso directo: $_" -ForegroundColor $ERRORCOLOR
         return $false
     }
 }
@@ -115,7 +112,7 @@ $result = New-Shortcut -ShortcutPath $desktopShortcut -TargetPath $launcherPath 
 if ($result) {
     Write-Host "[OK] Acceso directo en Escritorio: ToolKinventario.lnk" -ForegroundColor $SUCCESS
 } else {
-    Write-Host "[X] Error en Escritorio" -ForegroundColor $ERROR
+    Write-Host "[X] Error en Escritorio" -ForegroundColor $ERRORCOLOR
 }
 
 # Crear acceso directo en Menu Inicio
@@ -128,21 +125,7 @@ $result = New-Shortcut -ShortcutPath $startShortcut -TargetPath $launcherPath -W
 if ($result) {
     Write-Host "[OK] Acceso directo en Menu Inicio: ToolKinventario.lnk" -ForegroundColor $SUCCESS
 } else {
-    Write-Host "[X] Error en Menu Inicio" -ForegroundColor $ERROR
-}
-
-# Crear acceso directo para Desinstalar
-Write-Host ""
-Write-Host "Creando acceso directo de Desinstalacion..." -ForegroundColor Cyan
-
-$uninstallExe = (Split-Path $launcherPath -Parent) + "\unins000.exe"
-if (Test-Path $uninstallExe) {
-    $uninstallShortcut = Join-Path $appFolderPath "Desinstalar ToolKinventario.lnk"
-    $result = New-Shortcut -ShortcutPath $uninstallShortcut -TargetPath $uninstallExe -WorkingDir (Split-Path $uninstallExe -Parent) -Description "Desinstalar ToolKinventario"
-    
-    if ($result) {
-        Write-Host "[OK] Acceso directo de Desinstalacion creado" -ForegroundColor $SUCCESS
-    }
+    Write-Host "[X] Error en Menu Inicio" -ForegroundColor $ERRORCOLOR
 }
 
 # Preguntar por inicio automatico
@@ -165,10 +148,10 @@ if ($autoStart -eq "S" -or $autoStart -eq "s") {
     $regKey = "ToolKinventario"
     
     try {
-        Set-ItemProperty -Path $regPath -Name $regKey -Value "`"$launcherPath`""
+        Set-ItemProperty -Path $regPath -Name $regKey -Value "powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$launcherPath`""
         Write-Host "[OK] Agregado al inicio automatico" -ForegroundColor $SUCCESS
     } catch {
-        Write-Host "[X] Error agregando al inicio: $_" -ForegroundColor $ERROR
+        Write-Host "[X] Error agregando al inicio: $_" -ForegroundColor $ERRORCOLOR
     }
 }
 
