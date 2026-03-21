@@ -1,0 +1,61 @@
+# ==============================================================================
+# ToolKinventario - .gitignore
+# ==============================================================================
+
+# Dependencies
+node_modules/
+venv/
+__pycache__/
+
+# Python embebido para instalador (demasiado grande para GitHub)
+installer/python-embed/
+installer/python-embed-optimized/
+
+# Build outputs
+dist/**/*.zip
+dist/**/*.exe
+
+# Desktop app
+_desktop/
+desktop/
+
+# Database and logs
+*.db
+*.sqlite
+*.sqlite3
+logs/
+backups/
+
+# Environment variables
+.env
+.env.local
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Python
+*.py[cod]
+*.pyd
+*.so
+*.egg
+*.egg-info/
+.pytest_cache/
+
+# Excel reportes
+*.xlsx
+*.xls
+
+# PDF reportes
+reports/*.pdf
+
+# Archivos deprecados
+OBSOLETOS/

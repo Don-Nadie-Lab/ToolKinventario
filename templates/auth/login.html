@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Iniciar Sesión - ToolKinventario{% endblock %}
+
+{% block public_content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white text-center">
+                <h4 class="mb-0">
+                    <i class="bi bi-tools"></i>
+                    ToolKinventario
+                </h4>
+                <small>Sistema de Inventario</small>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">
+                            <i class="bi bi-person"></i> Usuario
+                        </label>
+                        <input type="text" class="form-control form-control-lg" 
+                               id="username" name="username" required autofocus>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">
+                            <i class="bi bi-lock"></i> Contraseña
+                        </label>
+                        <input type="password" class="form-control form-control-lg" 
+                               id="password" name="password" required>
+                    </div>
+                    
+                    {% if requiere_clave %}
+                    <div class="mb-3">
+                        <label for="clave_seguridad" class="form-label">
+                            <i class="bi bi-shield-lock"></i> Clave de Seguridad
+                        </label>
+                        <input type="password" class="form-control form-control-lg" 
+                               id="clave_seguridad" name="clave_seguridad" required>
+                    </div>
+                    {% endif %}
+                    
+                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                        Iniciar Sesión
+                    </button>
+                    
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('auth.recuperar_clave') }}"><i class="bi bi-question-circle"></i> Olvido su contrasena?</a>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center text-muted">
+                <small>
+                    <strong>Credenciales por defecto:</strong><br>
+                    Usuario: admin | Contraseña: admin123
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,344 @@
+{% extends "base.html" %}
+
+{% block title %}Nuevo Producto - ToolKinventario{% endblock %}
+
+{% block content %}
+<!-- Encabezado de la página -->
+<div class="row mb-4">
+    <div class="col">
+        <h1 class="h2">
+            <i class="bi bi-plus-circle"></i>
+            Nuevo Producto
+        </h1>
+        <p class="text-muted">
+            Agregue un nuevo producto al inventario
+        </p>
+    </div>
+    <div class="col-auto">
+        <a href="{{ url_for('views.lista_productos') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Volver a la lista
+        </a>
+    </div>
+</div>
+
+<!-- Formulario de nuevo producto -->
+<div class="card shadow">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">
+            <i class="bi bi-box"></i>
+            Información del Producto
+        </h6>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('views.nuevo_producto') }}">
+            <div class="row">
+                <!-- Columna izquierda -->
+                <div class="col-md-6">
+                    <!-- Código -->
+                    <div class="mb-3">
+                        <label for="codigo" class="form-label">Código *</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="codigo" name="codigo" 
+                                   placeholder="Código o código de barras" required
+                                   value="{{ request.args.get('codigo', '') }}">
+                            <button type="button" class="btn btn-outline-secondary" id="btnEscanear">
+                                <i class="bi bi-camera"></i>
+                            </button>
+                        </div>
+                        <small class="form-text text-muted">
+                            Código único para identificar el producto
+                        </small>
+                    </div>
+                    
+                    <!-- Nombre -->
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre *</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre" 
+                               placeholder="Nombre del producto" required>
+                    </div>
+                    
+                    <!-- Descripción -->
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="descripcion" name="descripcion" 
+                                  rows="3" placeholder="Descripción detallada del producto"></textarea>
+                    </div>
+                    
+                    <!-- Categoría -->
+                    <div class="mb-3">
+                        <label for="categoria_id" class="form-label">Categoría *</label>
+                        <select class="form-select" id="categoria_id" name="categoria_id" required>
+                            <option value="">Seleccione una categoría</option>
+                            {% for categoria in categorias %}
+                            <option value="{{ categoria.id }}">{{ categoria.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="mt-2">
+                            <button type="button" class="btn btn-sm btn-outline-primary" 
+                                    data-bs-toggle="modal" data-bs-target="#nuevaCategoriaModal">
+                                <i class="bi bi-plus"></i> Nueva Categoría
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Columna derecha -->
+                <div class="col-md-6">
+                    <!-- Cantidad inicial -->
+                    <div class="mb-3">
+                        <label for="cantidad" class="form-label">Cantidad Inicial</label>
+                        <input type="number" class="form-control" id="cantidad" name="cantidad" 
+                               min="0" value="0">
+                        <small class="form-text text-muted">
+                            Cantidad inicial en inventario
+                        </small>
+                    </div>
+                    
+                    <!-- Precio -->
+                    <div class="mb-3">
+                        <label for="precio" class="form-label">Precio</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" id="precio" name="precio" 
+                                   min="0" step="0.01" value="0.00">
+                        </div>
+                    </div>
+                    
+                    <!-- Stock mínimo -->
+                    <div class="mb-3">
+                        <label for="stock_minimo" class="form-label">Stock Mínimo</label>
+                        <input type="number" class="form-control" id="stock_minimo" name="stock_minimo" 
+                               min="0" value="5">
+                        <small class="form-text text-muted">
+                            Cantidad mínima antes de mostrar alerta
+                        </small>
+                    </div>
+                    
+                    <!-- Ubicación -->
+                    <div class="mb-3">
+                        <label for="ubicacion" class="form-label">Ubicación</label>
+                        <input type="text" class="form-control" id="ubicacion" name="ubicacion" 
+                               placeholder="Estante, pasillo, etc.">
+                    </div>
+                    
+                    <!-- Fecha de vencimiento -->
+                    <div class="mb-3">
+                        <label for="fecha_vencimiento" class="form-label">Fecha de Vencimiento</label>
+                        <input type="date" class="form-control" id="fecha_vencimiento" name="fecha_vencimiento">
+                    </div>
+                    
+                    <!-- Proveedor -->
+                    <div class="mb-3">
+                        <label for="proveedor_id" class="form-label">Proveedor</label>
+                        <select class="form-select" id="proveedor_id" name="proveedor_id">
+                            <option value="">Seleccione un proveedor</option>
+                            {% for proveedor in proveedores %}
+                            <option value="{{ proveedor.id }}">{{ proveedor.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="mt-2">
+                            <button type="button" class="btn btn-sm btn-outline-primary" 
+                                    data-bs-toggle="modal" data-bs-target="#nuevoProveedorModal">
+                                <i class="bi bi-plus"></i> Nuevo Proveedor
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Botones de acción -->
+            <div class="mt-4 text-center">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Guardar Producto
+                </button>
+                <a href="{{ url_for('views.lista_productos') }}" class="btn btn-secondary">
+                    <i class="bi bi-x-circle"></i> Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal para nueva categoría -->
+<div class="modal fade" id="nuevaCategoriaModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nueva Categoría</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formNuevaCategoria">
+                    <div class="mb-3">
+                        <label for="categoria_nombre" class="form-label">Nombre *</label>
+                        <input type="text" class="form-control" id="categoria_nombre" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="categoria_descripcion" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="categoria_descripcion" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnGuardarCategoria">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para nuevo proveedor -->
+<div class="modal fade" id="nuevoProveedorModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nuevo Proveedor</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formNuevoProveedor">
+                    <div class="mb-3">
+                        <label for="proveedor_nombre" class="form-label">Nombre *</label>
+                        <input type="text" class="form-control" id="proveedor_nombre" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="proveedor_contacto" class="form-label">Contacto</label>
+                        <input type="text" class="form-control" id="proveedor_contacto">
+                    </div>
+                    <div class="mb-3">
+                        <label for="proveedor_telefono" class="form-label">Teléfono</label>
+                        <input type="text" class="form-control" id="proveedor_telefono">
+                    </div>
+                    <div class="mb-3">
+                        <label for="proveedor_email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="proveedor_email">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnGuardarProveedor">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Botón para escanear código de barras
+    document.getElementById('btnEscanear').addEventListener('click', function() {
+        window.location.href = "{{ url_for('views.escanear_codigo') }}";
+    });
+    
+    // Guardar nueva categoría
+    document.getElementById('btnGuardarCategoria').addEventListener('click', function() {
+        const nombre = document.getElementById('categoria_nombre').value;
+        const descripcion = document.getElementById('categoria_descripcion').value;
+        
+        if (!nombre) {
+            alert('El nombre de la categoría es obligatorio');
+            return;
+        }
+        
+        // Enviar solicitud AJAX para crear categoría
+        fetch("{{ url_for('views.nueva_categoria') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: new URLSearchParams({
+                'nombre': nombre,
+                'descripcion': descripcion
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Agregar nueva categoría al select
+                const select = document.getElementById('categoria_id');
+                const option = document.createElement('option');
+                option.value = data.categoria.id;
+                option.text = data.categoria.nombre;
+                option.selected = true;
+                select.add(option);
+                
+                // Cerrar modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('nuevaCategoriaModal'));
+                modal.hide();
+                
+                // Limpiar formulario
+                document.getElementById('formNuevaCategoria').reset();
+                
+                // Mostrar mensaje de éxito
+                alert('Categoría creada correctamente');
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al crear la categoría');
+        });
+    });
+    
+    // Guardar nuevo proveedor
+    document.getElementById('btnGuardarProveedor').addEventListener('click', function() {
+        const nombre = document.getElementById('proveedor_nombre').value;
+        const contacto = document.getElementById('proveedor_contacto').value;
+        const telefono = document.getElementById('proveedor_telefono').value;
+        const email = document.getElementById('proveedor_email').value;
+        
+        if (!nombre) {
+            alert('El nombre del proveedor es obligatorio');
+            return;
+        }
+        
+        // Enviar solicitud AJAX para crear proveedor
+        fetch("{{ url_for('views.nuevo_proveedor') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: new URLSearchParams({
+                'nombre': nombre,
+                'contacto': contacto,
+                'telefono': telefono,
+                'email': email
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Agregar nuevo proveedor al select
+                const select = document.getElementById('proveedor_id');
+                const option = document.createElement('option');
+                option.value = data.proveedor.id;
+                option.text = data.proveedor.nombre;
+                option.selected = true;
+                select.add(option);
+                
+                // Cerrar modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('nuevoProveedorModal'));
+                modal.hide();
+                
+                // Limpiar formulario
+                document.getElementById('formNuevoProveedor').reset();
+                
+                // Mostrar mensaje de éxito
+                alert('Proveedor creado correctamente');
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al crear el proveedor');
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}Artículos - ToolKinventario{% endblock %}
+
+{% block content %}
+<!-- Encabezado de la página -->
+<div class="row mb-4">
+    <div class="col">
+        <h1 class="h2">
+            <i class="bi bi-boxes"></i>
+            Inventario de Artículos
+        </h1>
+        <p class="text-muted">
+            Gestión de artículos, marcas y tipos de posesión
+        </p>
+    </div>
+    <div class="col-auto">
+        {% if not current_user.is_maestro_carga() %}
+        <a href="{{ url_for('views.nuevo_repuesto') }}" class="btn btn-warning">
+            <i class="bi bi-plus-circle"></i> Nuevo Artículo
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Filtros de búsqueda -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">
+            <i class="bi bi-search"></i>
+            Filtros de Búsqueda
+        </h6>
+    </div>
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('views.lista_repuestos') }}" class="row g-3">
+            <div class="col-md-5">
+                <label for="busqueda" class="form-label">Buscar</label>
+                <input type="text" class="form-control" id="busqueda" name="busqueda" 
+                       placeholder="Descripción o marca" value="{{ busqueda }}">
+            </div>
+            
+            <div class="col-md-4">
+                <label for="tipo" class="form-label">Tipo de Posesión</label>
+                <select class="form-select" id="tipo" name="tipo">
+                    <option value="">Todos los tipos</option>
+                    <option value="Propio (Reventa)" {% if tipo_actual == 'Propio (Reventa)' %}selected{% endif %}>Propio (Reventa)</option>
+                    <option value="Consignación" {% if tipo_actual == 'Consignación' %}selected{% endif %}>Consignación</option>
+                </select>
+            </div>
+            
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2 w-100">
+                    <i class="bi bi-search"></i> Filtrar
+                </button>
+                <a href="{{ url_for('views.lista_repuestos') }}" class="btn btn-secondary">
+                    <i class="bi bi-x-circle"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Lista de repuestos -->
+<div class="card shadow">
+    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+        <h6 class="m-0 font-weight-bold text-primary">
+            <i class="bi bi-list"></i>
+            Lista de Artículos
+        </h6>
+        <span class="badge bg-warning text-dark">{{ repuestos.total }} registros</span>
+    </div>
+    <div class="card-body">
+        {% if repuestos.items %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Descripción</th>
+                        <th>Marca</th>
+                        <th>Tipo</th>
+                        <th>Stock</th>
+                        <th>P. Compra</th>
+                        <th>P. Venta</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in repuestos.items %}
+                    <tr>
+                        <td class="fw-bold">{{ r.descripcion }}</td>
+                        <td>{{ r.marca or 'N/A' }}</td>
+                        <td>
+                            <span class="badge {{ 'bg-primary' if r.tipo == 'Propio (Reventa)' else 'bg-info text-dark' }}">
+                                {{ r.tipo }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ 'danger' if r.cantidad <= 5 else 'success' }}">
+                                {{ r.cantidad }}
+                            </span>
+                        </td>
+                        <td>${{ "%.2f"|format(r.precio_compra) }}</td>
+                        <td class="text-success fw-bold">${{ "%.2f"|format(r.precio_venta) }}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                {% if not current_user.is_maestro_carga() %}
+                                <a href="{{ url_for('views.editar_repuesto', id=r.id) }}" class="btn btn-outline-warning" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                {% if current_user.is_admin() %}
+                                <button type="button" class="btn btn-outline-danger" title="Eliminar"
+                                        data-bs-toggle="modal" data-bs-target="#delModal{{ r.id }}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                                {% endif %}
+                                {% endif %}
+                            </div>
+
+                            <!-- Modal Eliminar -->
+                            {% if current_user.is_admin() %}
+                            <div class="modal fade" id="delModal{{ r.id }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Confirmar Eliminación</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            ¿Desea eliminar el repuesto <strong>{{ r.descripcion }}</strong>?
+                                        </div>
+                                        <div class="modal-footer">
+                                            <form action="{{ url_for('views.eliminar_repuesto', id=r.id) }}" method="POST">
+                                                <button type="submit" class="btn btn-danger">Eliminar</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación -->
+        {% if repuestos.pages > 1 %}
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                <li class="page-item {{ 'disabled' if not repuestos.has_prev }}">
+                    <a class="page-link" href="{{ url_for('views.lista_repuestos', page=repuestos.prev_num, busqueda=busqueda, tipo=tipo_actual) }}">Anterior</a>
+                </li>
+                {% for page_num in repuestos.iter_pages() %}
+                    {% if page_num %}
+                        <li class="page-item {{ 'active' if page_num == repuestos.page }}">
+                            <a class="page-link" href="{{ url_for('views.lista_repuestos', page=page_num, busqueda=busqueda, tipo=tipo_actual) }}">{{ page_num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                <li class="page-item {{ 'disabled' if not repuestos.has_next }}">
+                    <a class="page-link" href="{{ url_for('views.lista_repuestos', page=repuestos.next_num, busqueda=busqueda, tipo=tipo_actual) }}">Siguiente</a>
+                </li>
+            </ul>
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-tools text-muted" style="font-size: 3rem;"></i>
+            <p class="mt-3">No se encontraron repuestos en el inventario.</p>
+            <a href="{{ url_for('views.nuevo_repuesto') }}" class="btn btn-warning">Agregar primer repuesto</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

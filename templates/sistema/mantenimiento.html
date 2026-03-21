@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Mantenimiento - WarehouseControl{% endblock %}
+
+{% block page_content %}
+<div class="row fade-in">
+    <div class="col-md-12 mb-4">
+        <h2 class="h4 text-white"><i class="bi bi-database-gear me-2"></i>Mantenimiento del Sistema</h2>
+        <p class="text-muted small">Realice operaciones de respaldo y verificación de integridad para asegurar el funcionamiento del almacén.</p>
+    </div>
+
+    <!-- Integrity Status -->
+    <div class="col-md-6 mb-4">
+        <div class="card glass-card h-100">
+            <div class="card-body">
+                <h5 class="card-title text-primary"><i class="bi bi-check-circle me-2"></i>Integridad de Datos</h5>
+                <hr class="opacity-25">
+                
+                <div class="d-flex align-items-center mb-4">
+                    {% if integridad.integridad_ok %}
+                        <div class="rounded-circle bg-success bg-opacity-25 p-3 me-3">
+                            <i class="bi bi-shield-check text-success fs-3"></i>
+                        </div>
+                        <div>
+                            <p class="mb-0 fw-bold text-success">Estado Saludable</p>
+                            <small class="text-muted">No se detectaron inconsistencias en la base de datos.</small>
+                        </div>
+                    {% else %}
+                        <div class="rounded-circle bg-warning bg-opacity-25 p-3 me-3">
+                            <i class="bi bi-shield-exclamation text-warning fs-3"></i>
+                        </div>
+                        <div>
+                            <p class="mb-0 fw-bold text-warning">Atención Requerida</p>
+                            <small class="text-muted">{{ integridad.errores|length }} problemas detectados.</small>
+                        </div>
+                    {% endif %}
+                </div>
+
+                {% if not integridad.integridad_ok %}
+                <div class="alert alert-warning bg-dark border-warning border-opacity-25 small">
+                    <ul class="mb-0">
+                        {% for error in integridad.errores %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <form action="{{ url_for('views.reparar_db') }}" method="POST">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-tools me-2"></i>Verificar / Reparar Base de Datos
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Backups -->
+    <div class="col-md-6 mb-4">
+        <div class="card glass-card h-100">
+            <div class="card-body">
+                <h5 class="card-title text-info"><i class="bi bi-cloud-arrow-up me-2"></i>Gestión de Respaldos</h5>
+                <hr class="opacity-25">
+
+                <div class="mb-4">
+                    <form action="{{ url_for('views.crear_respaldo') }}" method="POST">
+                        <input type="hidden" name="tipo" value="completo">
+                        <button type="submit" class="btn btn-outline-info w-100">
+                            <i class="bi bi-plus-circle me-2"></i>Generar Nuevo Respaldo Completo
+                        </button>
+                    </form>
+                </div>
+
+                <h6 class="small text-uppercase text-muted mt-4">Últimos archivos:</h6>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover border-secondary table-sm">
+                        <thead>
+                            <tr>
+                                <th>Archivo</th>
+                                <th>Fecha</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for archivo in archivos %}
+                            <tr>
+                                <td class="small">{{ archivo.nombre }}</td>
+                                <td class="small text-muted">{{ archivo.fecha.strftime('%d/%m/%Y') }}</td>
+                                <td>
+                                    <a href="{{ url_for('views.descargar_respaldo', filename=archivo.nombre) }}" class="text-info"><i class="bi bi-download"></i></a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center text-muted py-3 small">No hay respaldos recientes.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-end">
+                    <a href="{{ url_for('views.lista_respaldos') }}" class="small text-info text-decoration-none">Ver todos los respaldos →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

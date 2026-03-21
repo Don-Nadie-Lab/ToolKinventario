@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Ver Producto - ToolKinventario{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2><i class="bi bi-box-seam"></i> Detalles del Producto</h2>
+        <hr>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="mb-0">{{ producto.nombre }}</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Código:</strong> <code>{{ producto.codigo }}</code></p>
+                        <p><strong>Categoría:</strong> {{ producto.categoria.nombre }}</p>
+                        <p><strong>Ubicación:</strong> {{ producto.ubicacion or 'No especificada' }}</p>
+                        <p><strong>Proveedor:</strong> {{ producto.proveedor.nombre if producto.proveedor else 'No asignado' }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Precio:</strong> ${{ "%.2f"|format(producto.precio) }}</p>
+                        <p><strong>Stock Actual:</strong> 
+                            <span class="badge bg-{{ 'danger' if producto.cantidad <= producto.stock_minimo else 'success' }}">
+                                {{ producto.cantidad }}
+                            </span>
+                        </p>
+                        <p><strong>Stock Mínimo:</strong> {{ producto.stock_minimo }}</p>
+                        <p><strong>Vencimiento:</strong> {{ producto.fecha_vencimiento.strftime('%d/%m/%Y') if producto.fecha_vencimiento else 'No aplica' }}</p>
+                    </div>
+                </div>
+                {% if producto.descripcion %}
+                <div class="mt-3">
+                    <strong>Descripción:</strong>
+                    <p>{{ producto.descripcion }}</p>
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-footer">
+                <a href="{{ url_for('views.editar_producto', id=producto.id) }}" class="btn btn-primary">
+                    <i class="bi bi-pencil"></i> Editar
+                </a>
+                <a href="{{ url_for('views.lista_productos') }}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Volver
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-header bg-warning">
+                <h6 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Estado</h6>
+            </div>
+            <div class="card-body">
+                {% if producto.cantidad <= 0 %}
+                <div class="alert alert-danger">Sin stock</div>
+                {% elif producto.cantidad <= producto.stock_minimo %}
+                <div class="alert alert-warning">Stock bajo</div>
+                {% else %}
+                <div class="alert alert-success">Stock OK</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Valor en Inventario</h6>
+            </div>
+            <div class="card-body text-center">
+                <h3 class="text-primary">${{ "%.2f"|format(producto.cantidad * producto.precio) }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Historial de Movimientos -->
+<div class="row mt-3">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clock-history"></i> Historial de Movimientos</h5>
+            </div>
+            <div class="card-body">
+                {% if movimientos %}
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Tipo</th>
+                                <th>Cantidad</th>
+                                <th>Anterior</th>
+                                <th>Nueva</th>
+                                <th>Usuario</th>
+                                <th>Comentario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for m in movimientos %}
+                            <tr>
+                                <td>{{ m.fecha.strftime('%d/%m/%Y %H:%M') }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if m.tipo == 'entrada' else 'danger' if m.tipo == 'salida' else 'info' }}">
+                                        {{ m.tipo }}
+                                    </span>
+                                </td>
+                                <td>{{ m.cantidad }}</td>
+                                <td>{{ m.cantidad_anterior }}</td>
+                                <td>{{ m.cantidad_nueva }}</td>
+                                <td>{{ m.usuario.username }}</td>
+                                <td>{{ m.comentario or '-' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">No hay movimientos registrados</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

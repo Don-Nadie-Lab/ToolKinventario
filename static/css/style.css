@@ -1,0 +1,293 @@
+/* ToolKinventario - Estilos personalizados */
+
+/* Variables de colores */
+:root {
+  --primary-color: #4e73df;
+  --secondary-color: #858796;
+  --success-color: #1cc88a;
+  --info-color: #36b9cc;
+  --warning-color: #f6c23e;
+  --danger-color: #e74a3b;
+  --light-color: #f8f9fc;
+  --dark-color: #5a5c69;
+}
+
+/* Estilos generales */
+body {
+  font-family: "Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: #f8f9fc;
+}
+
+/* Optimizaciones para pantallas táctiles */
+.btn {
+  padding: 0.5rem 1rem;
+  margin: 0.25rem;
+}
+
+.btn-lg {
+  padding: 0.75rem 1.5rem;
+}
+
+.form-control,
+.form-select {
+  padding: 0.5rem 0.75rem;
+  min-height: 42px;
+}
+
+/* Estilos para tarjetas */
+.card {
+  border: none;
+  border-radius: 0.35rem;
+  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+  margin-bottom: 1.5rem;
+}
+
+.card-header {
+  background-color: #f8f9fc;
+  border-bottom: 1px solid #e3e6f0;
+  padding: 0.75rem 1.25rem;
+}
+
+.card-header h6 {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--primary-color);
+}
+
+/* Estilos para tablas */
+.table {
+  color: #5a5c69;
+}
+
+.table th {
+  background-color: #f8f9fc;
+  font-weight: 700;
+  border-top: none;
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(78, 115, 223, 0.05);
+}
+
+/* Estilos para la barra de navegación */
+.navbar-dark.bg-primary {
+  background-color: #4e73df !important;
+}
+
+.navbar-brand {
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.nav-link {
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+}
+
+/* Estilos para el sidebar en versión móvil */
+@media (max-width: 768px) {
+  .navbar-collapse {
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+}
+
+/* Estilos para badges */
+.badge {
+  font-weight: 600;
+  padding: 0.35em 0.65em;
+}
+
+/* Estilos para formularios */
+.form-label {
+  font-weight: 600;
+  color: #5a5c69;
+}
+
+.form-text {
+  color: #858796;
+}
+
+/* Estilos para botones de acción en tablas */
+.btn-group-sm > .btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+/* Estilos para paginación */
+.pagination {
+  margin-top: 1.5rem;
+}
+
+.page-link {
+  color: var(--primary-color);
+  padding: 0.5rem 0.75rem;
+}
+
+.page-item.active .page-link {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+/* Estilos para alertas */
+.alert {
+  border-radius: 0.35rem;
+  border: none;
+}
+
+/* Estilos para modales */
+.modal-header {
+  background-color: #f8f9fc;
+  border-bottom: 1px solid #e3e6f0;
+}
+
+.modal-title {
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+/* Estilos para el footer */
+footer {
+  background-color: #fff;
+  border-top: 1px solid #e3e6f0;
+}
+
+/* Estilos para iconos */
+.bi {
+  margin-right: 0.25rem;
+  vertical-align: -0.125em;
+}
+
+/* Estilos para código */
+code {
+  background-color: #f8f9fc;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.2rem;
+  color: var(--primary-color);
+}
+
+/* Optimizaciones para Raspberry Pi */
+@media (max-width: 1024px) {
+  html {
+    font-size: 14px;
+  }
+
+  .container-fluid {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .card-body {
+    padding: 1rem;
+  }
+
+  .table {
+    font-size: 0.9rem;
+  }
+}
+
+/* Estilos para pantallas muy pequeñas (7") */
+@media (max-width: 600px) {
+  html {
+    font-size: 12px;
+  }
+
+  .h1,
+  h1 {
+    font-size: 1.75rem;
+  }
+
+  .h2,
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  .table {
+    font-size: 0.85rem;
+  }
+
+  .btn {
+    padding: 0.4rem 0.8rem;
+  }
+}
+
+/* Estilos para el dashboard */
+.border-left-primary,
+.border-left-success,
+.border-left-info,
+.border-left-warning,
+.border-left-danger {
+  border-left: 0.25rem solid;
+  padding-left: 0.5rem;
+}
+
+.border-left-primary {
+  border-left-color: var(--primary-color);
+}
+
+.border-left-success {
+  border-left-color: var(--success-color);
+}
+
+.border-left-info {
+  border-left-color: var(--info-color);
+}
+
+.border-left-warning {
+  border-left-color: var(--warning-color);
+}
+
+.border-left-danger {
+  border-left-color: var(--danger-color);
+}
+
+/* Estilos para accesos rápidos */
+.btn-outline-primary,
+.btn-outline-success,
+.btn-outline-info,
+.btn-outline-secondary {
+  border-width: 2px;
+}
+
+/* Estilos para campos de solo lectura */
+.form-control:read-only {
+  background-color: #f8f9fc;
+}
+
+/* Estilos para tooltips */
+.tooltip {
+  font-size: 0.85rem;
+}
+
+/* Estilos para el modo oscuro (opcional) */
+@media (prefers-color-scheme: dark) {
+  body.dark-mode {
+    background-color: #1a1a27;
+    color: #e3e6f0;
+  }
+
+  .dark-mode .card {
+    background-color: #2a2a3c;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(0, 0, 0, 0.2);
+  }
+
+  .dark-mode .card-header {
+    background-color: #222230;
+    border-bottom: 1px solid #303045;
+  }
+
+  .dark-mode .table {
+    color: #e3e6f0;
+  }
+
+  .dark-mode .table th {
+    background-color: #222230;
+  }
+
+  .dark-mode .form-control,
+  .dark-mode .form-select {
+    background-color: #2a2a3c;
+    border-color: #303045;
+    color: #e3e6f0;
+  }
+}

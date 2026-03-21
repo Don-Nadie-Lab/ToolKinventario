@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block title %}Nuevo Movimiento - ToolKinventario{% endblock %}
+
+{% block content %}
+<!-- Encabezado de la página -->
+<div class="row mb-4">
+    <div class="col">
+        <h1 class="h2">
+            <i class="bi bi-arrow-left-right"></i>
+            Registrar Movimiento
+        </h1>
+        <p class="text-muted">
+            Registre entradas, salidas o ajustes de inventario
+        </p>
+    </div>
+    <div class="col-auto">
+        <div class="btn-group" role="group">
+            <a href="{{ url_for('views.lista_movimientos') }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Volver al historial
+            </a>
+            <a href="{{ url_for('views.escanear_codigo') }}" class="btn btn-info">
+                <i class="bi bi-camera"></i> Escanear Código
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Formulario de nuevo movimiento -->
+<div class="card shadow">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">
+            <i class="bi bi-clipboard-plus"></i>
+            Información del Movimiento
+        </h6>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('views.nuevo_movimiento') }}">
+            <div class="row">
+                <!-- Columna izquierda -->
+                <div class="col-md-6">
+                    <!-- Producto -->
+                    <div class="mb-3">
+                        <label for="producto_id" class="form-label">Producto *</label>
+                        <select class="form-select" id="producto_id" name="producto_id" required>
+                            <option value="">Seleccione un producto</option>
+                            {% for producto in productos %}
+                            <option value="{{ producto.id }}" 
+                                    data-stock="{{ producto.cantidad }}"
+                                    {% if producto_seleccionado and producto.id == producto_seleccionado.id %}selected{% endif %}>
+                                {{ producto.codigo }} - {{ producto.nombre }} (Stock: {{ producto.cantidad }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <div class="mt-2">
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="btnEscanear">
+                                <i class="bi bi-camera"></i> Escanear Código
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Tipo de movimiento -->
+                    <div class="mb-3">
+                        <label for="tipo" class="form-label">Tipo de Movimiento *</label>
+                        <select class="form-select" id="tipo" name="tipo" required>
+                            <option value="">Seleccione un tipo</option>
+                            <option value="{{ tipos_movimiento.ENTRADA }}">Entrada</option>
+                            <option value="{{ tipos_movimiento.SALIDA }}">Salida</option>
+                            <option value="{{ tipos_movimiento.AJUSTE }}">Ajuste</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Cantidad -->
+                    <div class="mb-3">
+                        <label for="cantidad" class="form-label">Cantidad *</label>
+                        <input type="number" class="form-control" id="cantidad" name="cantidad" 
+                               min="1" value="1" required>
+                        <small class="form-text text-muted" id="stockInfo">
+                            Ingrese la cantidad a mover
+                        </small>
+                    </div>
+                </div>
+                
+                <!-- Columna derecha -->
+                <div class="col-md-6">
+                    <!-- Referencia -->
+                    <div class="mb-3">
+                        <label for="referencia" class="form-label">Referencia</label>
+                        <input type="text" class="form-control" id="referencia" name="referencia" 
+                               placeholder="Factura, orden, etc.">
+                    </div>
+                    
+                    <!-- Comentario -->
+                    <div class="mb-3">
+                        <label for="comentario" class="form-label">Comentario</label>
+                        <textarea class="form-control" id="comentario" name="comentario" 
+                                  rows="4" placeholder="Detalles adicionales del movimiento"></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Resumen del movimiento -->
+            <div class="card bg-light mt-4 mb-4">
+                <div class="card-body">
+                    <h6 class="card-title">Resumen del Movimiento</h6>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <p class="mb-1"><strong>Producto:</strong> <span id="resumenProducto">-</span></p>
+                            <p class="mb-1"><strong>Stock Actual:</strong> <span id="resumenStock">-</span></p>
+                        </div>
+                        <div class="col-md-4">
+                            <p class="mb-1"><strong>Tipo:</strong> <span id="resumenTipo">-</span></p>
+                            <p class="mb-1"><strong>Cantidad:</strong> <span id="resumenCantidad">-</span></p>
+                        </div>
+                        <div class="col-md-4">
+                            <p class="mb-1"><strong>Stock Resultante:</strong> <span id="resumenResultado">-</span></p>
+                            <p class="mb-1"><strong>Usuario:</strong> {{ current_user.nombre }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Botones de acción -->
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary" id="btnGuardar">
+                    <i class="bi bi-save"></i> Registrar Movimiento
+                </button>
+                <a href="{{ url_for('views.lista_movimientos') }}" class="btn btn-secondary">
+                    <i class="bi bi-x-circle"></i> Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Elementos del formulario
+    const productoSelect = document.getElementById('producto_id');
+    const tipoSelect = document.getElementById('tipo');
+    const cantidadInput = document.getElementById('cantidad');
+    const stockInfo = document.getElementById('stockInfo');
+    const btnGuardar = document.getElementById('btnGuardar');
+    
+    // Elementos del resumen
+    const resumenProducto = document.getElementById('resumenProducto');
+    const resumenStock = document.getElementById('resumenStock');
+    const resumenTipo = document.getElementById('resumenTipo');
+    const resumenCantidad = document.getElementById('resumenCantidad');
+    const resumenResultado = document.getElementById('resumenResultado');
+    
+    // Botón para escanear código de barras
+    document.getElementById('btnEscanear').addEventListener('click', function() {
+        window.location.href = "{{ url_for('views.escanear_codigo') }}";
+    });
+    
+    // Función para actualizar el resumen
+    function actualizarResumen() {
+        const productoOption = productoSelect.options[productoSelect.selectedIndex];
+        const tipoOption = tipoSelect.options[tipoSelect.selectedIndex];
+        const cantidad = parseInt(cantidadInput.value) || 0;
+        
+        if (productoOption && productoOption.value) {
+            const stockActual = parseInt(productoOption.dataset.stock) || 0;
+            const productoTexto = productoOption.text.split(' (')[0];
+            
+            resumenProducto.textContent = productoTexto;
+            resumenStock.textContent = stockActual;
+            
+            if (tipoOption && tipoOption.value) {
+                resumenTipo.textContent = tipoOption.text;
+                
+                let stockResultante = stockActual;
+                if (tipoOption.value === '{{ tipos_movimiento.ENTRADA }}') {
+                    stockResultante = stockActual + cantidad;
+                } else if (tipoOption.value === '{{ tipos_movimiento.SALIDA }}') {
+                    stockResultante = stockActual - cantidad;
+                } else if (tipoOption.value === '{{ tipos_movimiento.AJUSTE }}') {
+                    stockResultante = cantidad;
+                }
+                
+                resumenCantidad.textContent = cantidad;
+                resumenResultado.textContent = stockResultante;
+                
+                // Validar stock resultante
+                if (tipoOption.value === '{{ tipos_movimiento.SALIDA }}' && stockResultante < 0) {
+                    stockInfo.textContent = '⚠️ No hay suficiente stock para esta salida';
+                    stockInfo.classList.add('text-danger');
+                    btnGuardar.disabled = true;
+                } else {
+                    stockInfo.textContent = 'Stock resultante: ' + stockResultante;
+                    stockInfo.classList.remove('text-danger');
+                    btnGuardar.disabled = false;
+                }
+            } else {
+                resumenTipo.textContent = '-';
+                resumenCantidad.textContent = '-';
+                resumenResultado.textContent = '-';
+            }
+        } else {
+            resumenProducto.textContent = '-';
+            resumenStock.textContent = '-';
+            resumenTipo.textContent = '-';
+            resumenCantidad.textContent = '-';
+            resumenResultado.textContent = '-';
+        }
+    }
+    
+    // Eventos para actualizar el resumen
+    productoSelect.addEventListener('change', actualizarResumen);
+    tipoSelect.addEventListener('change', actualizarResumen);
+    cantidadInput.addEventListener('input', actualizarResumen);
+    
+    // Inicializar resumen
+    actualizarResumen();
+});
+</script>
+{% endblock %}

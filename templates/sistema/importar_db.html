@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block title %}Importar Base de Datos - ToolKinventario{% endblock %}
+
+{% block page_content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex align-items-center mb-4">
+            <a href="{{ url_for('views.configuracion') }}" class="btn btn-outline-secondary me-3">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <div>
+                <h2 class="mb-0">
+                    <i class="bi bi-database-fill-up text-warning me-2"></i>
+                    Importar Base de Datos
+                </h2>
+                <small class="text-muted">Restaura datos desde un archivo de respaldo</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <!-- Instrucciones -->
+        <div class="card glass-panel mb-4">
+            <div class="card-body">
+                <h5 class="card-title text-info">
+                    <i class="bi bi-info-circle me-2"></i>Instrucciones
+                </h5>
+                <hr class="opacity-25">
+                <ol class="mb-0">
+                    <li class="mb-2">Selecciona un archivo <code>.json</code>exportado previamente desde ToolKinventario</li>
+                    <li class="mb-2">Haz clic en "Previsualizar" para ver qué datos se importarán</li>
+                    <li class="mb-2">Revisa la información y confirma la importación</li>
+                    <li class="text-warning">
+                        <strong>Importante:</strong> Antes de importar, se creará automáticamente un respaldo de tus datos actuales
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Formulario de Importación -->
+        <div class="card glass-panel">
+            <div class="card-body">
+                <form id="formImport" method="POST" enctype="multipart/form-data" action="{{ url_for('views.importar_db') }}">
+                    <div class="mb-4">
+                        <label for="archivo" class="form-label">
+                            <i class="bi bi-file-earmark-code me-2"></i>Seleccionar archivo JSON
+                        </label>
+                        <input type="file" class="form-control" id="archivo" name="archivo" accept=".json" required>
+                        <div class="form-text">Archivo exportado desde ToolKinventario (formato .json)</div>
+                    </div>
+
+                    <!-- Preview -->
+                    <div id="previewContainer" class="d-none mb-4">
+                        <h6 class="text-muted mb-3">
+                            <i class="bi bi-eye me-2"></i>Previsualización
+                        </h6>
+                        <div id="previewContent" class="alert alert-dark"></div>
+                    </div>
+
+                    <!-- Advertencias -->
+                    <div id="warningsContainer" class="d-none mb-4">
+                        <div id="warningsContent" class="alert alert-warning"></div>
+                    </div>
+
+                    <!-- Errores -->
+                    <div id="errorsContainer" class="d-none mb-4">
+                        <div id="errorsContent" class="alert alert-danger"></div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-info" onclick="previsualizar()">
+                            <i class="bi bi-eye me-2"></i>Previsualizar
+                        </button>
+                        <button type="submit" id="btnImportar" class="btn btn-success" disabled>
+                            <i class="bi bi-database-fill-add me-2"></i>Importar Datos
+                        </button>
+                        <a href="{{ url_for('views.configuracion') }}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle me-2"></i>Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel Lateral -->
+    <div class="col-lg-4">
+        <!-- Info del Sistema -->
+        <div class="card glass-panel mb-4">
+            <div class="card-body">
+                <h5 class="card-title text-primary">
+                    <i class="bi bi-gear me-2"></i>Información del Sistema
+                </h5>
+                <hr class="opacity-25">
+                <dl class="row mb-0">
+                    <dt class="col-6 text-muted small">Versión Schema</dt>
+                    <dd class="col-6" id="currentVersion">Cargando...</dd>
+                    <dt class="col-6 text-muted small">App</dt>
+                    <dd class="col-6">ToolKinventario</dd>
+                </dl>
+            </div>
+        </div>
+
+        <!-- Tips -->
+        <div class="card glass-panel">
+            <div class="card-body">
+                <h5 class="card-title text-warning">
+                    <i class="bi bi-lightbulb me-2"></i>Consejos
+                </h5>
+                <hr class="opacity-25">
+                <ul class="small mb-0">
+                    <li class="mb-2">Los datos existentes NO se eliminarán</li>
+                    <li class="mb-2">Solo se agregarán datos nuevos</li>
+                    <li class="mb-2">Los productos se identifican por código</li>
+                    <li class="mb-2">Se creará un backup automático</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    cargarInfoSistema();
+});
+
+async function cargarInfoSistema() {
+    try {
+        const response = await fetch('{{ url_for("views.info_schema") }}');
+        const data = await response.json();
+        document.getElementById('currentVersion').textContent = data.version_schema_actual || 'N/A';
+    } catch (error) {
+        document.getElementById('currentVersion').textContent = 'Error';
+    }
+}
+
+async function previsualizar() {
+    const archivo = document.getElementById('archivo').files[0];
+    
+    if (!archivo) {
+        alert('Por favor selecciona un archivo primero');
+        return;
+    }
+    
+    if (!archivo.name.endsWith('.json')) {
+        alert('Por favor selecciona un archivo JSON');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('archivo', archivo);
+    
+    try {
+        const response = await fetch('{{ url_for("views.preview_import") }}', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        // Mostrar preview
+        const previewContainer = document.getElementById('previewContainer');
+        const previewContent = document.getElementById('previewContent');
+        
+        if (data.valido) {
+            previewContainer.classList.remove('d-none');
+            previewContent.className = 'alert alert-dark';
+            
+            let html = '<strong>Archivo válido</strong><br>';
+            html += '<small class="text-muted">Fecha de exportación: ' + (data.metadatos?.fecha_export || 'N/A') + '</small><hr>';
+            html += '<div class="row">';
+            html += '<div class="col-6"><strong>Usuarios:</strong> ' + (data.contenido?.usuarios || 0) + '</div>';
+            html += '<div class="col-6"><strong>Categorías:</strong> ' + (data.contenido?.categorias || 0) + '</div>';
+            html += '<div class="col-6"><strong>Proveedores:</strong> ' + (data.contenido?.proveedores || 0) + '</div>';
+            html += '<div class="col-6"><strong>Productos:</strong> ' + (data.contenido?.productos || 0) + '</div>';
+            html += '<div class="col-6"><strong>Movimientos:</strong> ' + (data.contenido?.movimientos || 0) + '</div>';
+            html += '<div class="col-6"><strong>Artículos:</strong> ' + (data.contenido?.repuestos || 0) + '</div>';
+            html += '</div>';
+            html += '<hr><small class="text-muted">Total registros: ' + (data.total_registros || 0) + '</small>';
+            
+            previewContent.innerHTML = html;
+            
+            // Habilitar botón de importar
+            document.getElementById('btnImportar').disabled = false;
+        } else {
+            previewContainer.classList.add('d-none');
+            document.getElementById('btnImportar').disabled = true;
+        }
+        
+        // Mostrar advertencias
+        const warningsContainer = document.getElementById('warningsContainer');
+        const warningsContent = document.getElementById('warningsContent');
+        
+        if (data.advertencias && data.advertencias.length > 0) {
+            warningsContainer.classList.remove('d-none');
+            warningsContent.innerHTML = '<strong>Advertencias:</strong><ul class="mb-0">';
+            data.advertencias.forEach(w => {
+                warningsContent.innerHTML += '<li>' + w + '</li>';
+            });
+            warningsContent.innerHTML += '</ul>';
+        } else {
+            warningsContainer.classList.add('d-none');
+        }
+        
+        // Mostrar errores
+        const errorsContainer = document.getElementById('errorsContainer');
+        const errorsContent = document.getElementById('errorsContent');
+        
+        if (data.errores && data.errores.length > 0) {
+            errorsContainer.classList.remove('d-none');
+            errorsContent.innerHTML = '<strong>Errores:</strong><ul class="mb-0">';
+            data.errores.forEach(e => {
+                errorsContent.innerHTML += '<li>' + e + '</li>';
+            });
+            errorsContent.innerHTML += '</ul>';
+        } else {
+            errorsContainer.classList.add('d-none');
+        }
+        
+    } catch (error) {
+        alert('Error al previsualizar: ' + error.message);
+    }
+}
+
+// Verificar archivo al seleccionar
+document.getElementById('archivo').addEventListener('change', function() {
+    // Resetear preview
+    document.getElementById('previewContainer').classList.add('d-none');
+    document.getElementById('warningsContainer').classList.add('d-none');
+    document.getElementById('errorsContainer').classList.add('d-none');
+    document.getElementById('btnImportar').disabled = true;
+});
+</script>
+{% endblock %}

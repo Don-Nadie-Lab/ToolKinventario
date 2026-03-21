@@ -1,0 +1,49 @@
+# ToolKinventario - Dependencias de Python
+# Sistema de inventario para Windows - Version Offline
+
+# Framework web principal
+Flask==2.3.3
+Flask-SQLAlchemy==3.0.5
+Flask-Login==0.6.3
+Flask-Migrate==4.0.7
+Flask-WTF==1.2.1
+Flask-Mail==0.9.1
+
+# Base de datos
+SQLAlchemy==2.0.36
+
+# Seguridad y autenticacion
+Werkzeug==2.3.7
+bcrypt==4.0.1
+
+# Procesamiento de imagenes y codigos de barras
+opencv-python>=4.8.1.78
+pyzbar==0.1.9
+Pillow>=10.0.1
+numpy>=1.26.0
+
+# Utilidades para archivos y datos
+python-csv==0.0.13
+
+# Monitoreo del sistema
+psutil==5.9.5
+
+# Programador de tareas (backups automaticos)
+APScheduler==3.10.4
+
+# Servidor WSGI para produccion
+gunicorn==21.2.0
+
+# Desarrollo y testing (opcional)
+pytest==7.4.2
+pytest-flask==1.2.0
+
+# Documentacion
+Sphinx==7.1.2
+
+# Utilidades adicionales
+python-dotenv==1.0.0
+click==8.1.7
+
+# Empaquetado para Windows (.exe)
+pyinstaller>=6.0

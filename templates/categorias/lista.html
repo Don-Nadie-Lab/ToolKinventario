@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Categorías - ToolKinventario{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center mb-4 pb-3 border-bottom border-secondary border-opacity-25 fade-in">
+    <h1 class="h2 fw-bold text-transparent bg-clip-text" style="background: linear-gradient(90deg, #f8fafc, #a78bfa); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
+        <i class="bi bi-tags text-white opacity-75 me-2"></i> Categorías
+    </h1>
+    <a href="{{ url_for('views.nueva_categoria') }}" class="btn btn-primary shadow-sm hover-zoom d-flex align-items-center gap-2">
+        <i class="bi bi-plus-lg"></i> Nueva Categoría
+    </a>
+</div>
+
+<div class="card glass-panel border-0 shadow-lg fade-in" style="animation-delay: 0.1s;">
+    <div class="card-body p-0">
+        {% if categorias %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-dark bg-opacity-50">
+                    <tr>
+                        <th class="border-bottom-0 ps-4 rounded-top-start fw-semibold text-uppercase small text-muted" style="width: 5%">ID</th>
+                        <th class="border-bottom-0 fw-semibold text-uppercase small text-muted" style="width: 25%">Nombre</th>
+                        <th class="border-bottom-0 fw-semibold text-uppercase small text-muted" style="width: 40%">Descripción</th>
+                        <th class="border-bottom-0 text-center fw-semibold text-uppercase small text-muted" style="width: 15%">Productos</th>
+                        <th class="border-bottom-0 text-end pe-4 rounded-top-end fw-semibold text-uppercase small text-muted" style="width: 15%">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="border-top-0">
+                    {% for cat in categorias %}
+                    <tr class="border-bottom border-secondary border-opacity-10 transition-all hover-highlight">
+                        <td class="ps-4 text-muted small">{{ cat.id }}</td>
+                        <td class="fw-medium text-white">{{ cat.nombre }}</td>
+                        <td class="text-muted small text-truncate" style="max-width: 200px;">{{ cat.descripcion or '-' }}</td>
+                        <td class="text-center">
+                            <span class="badge rounded-pill bg-primary bg-opacity-25 text-primary border border-primary border-opacity-50 px-3">
+                                {{ cat.productos|length }}
+                            </span>
+                        </td>
+                        <td class="text-end pe-4">
+                            <div class="btn-group" role="group">
+                                <a href="{{ url_for('views.editar_categoria', id=cat.id) }}" class="btn btn-sm btn-outline-warning border-opacity-50 hover-zoom" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                {% if cat.productos|length == 0 %}
+                                <form method="POST" action="{{ url_for('views.eliminar_categoria', id=cat.id) }}" class="d-inline m-0 p-0">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger border-opacity-50 hover-zoom h-100 rounded-start-0" onclick="return confirm('¿Eliminar categoría? Esta acción no se puede deshacer.')" title="Eliminar">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <div class="text-muted mb-3"><i class="bi bi-tags" style="font-size: 3rem; opacity: 0.5;"></i></div>
+            <h5 class="text-white">Sin categorías</h5>
+            <p class="text-muted">Aún no hay categorías registradas. Organiza tus productos creando una.</p>
+            <a href="{{ url_for('views.nueva_categoria') }}" class="btn btn-outline-primary btn-sm mt-2">Crear mi primera categoría</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

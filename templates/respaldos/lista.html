@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Respaldos - ToolKinventario{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="bi bi-cloud-upload"></i> Respaldos</h1>
+    <form method="POST" action="{{ url_for('views.crear_respaldo') }}" class="d-flex gap-2">
+        <select name="tipo" class="form-select">
+            <option value="completo">Completo</option>
+            <option value="productos">Solo Productos</option>
+            <option value="movimientos">Solo Movimientos</option>
+        </select>
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Crear Respaldo
+        </button>
+    </form>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if archivos %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Tamaño</th>
+                        <th>Fecha</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for archivo in archivos %}
+                    <tr>
+                        <td><i class="bi bi-file-earmark-zip"></i> {{ archivo.nombre }}</td>
+                        <td>{{ (archivo.tamano / 1024)|round(2) }} KB</td>
+                        <td>{{ archivo.fecha.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td>
+                            <a href="{{ url_for('views.descargar_respaldo', filename=archivo.nombre) }}" class="btn btn-sm btn-success">
+                                <i class="bi bi-download"></i>
+                            </a>
+                            <form method="POST" action="{{ url_for('views.eliminar_respaldo') }}" style="display:inline;">
+                                <input type="hidden" name="filename" value="{{ archivo.nombre }}">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar respaldo?')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center text-muted py-5">
+            <i class="bi bi-cloud-upload" style="font-size: 3rem;"></i>
+            <p>No hay respaldos disponibles</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

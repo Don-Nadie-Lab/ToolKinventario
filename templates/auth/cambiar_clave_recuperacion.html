@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Cambiar Contrasena{% endblock %}
+
+{% block public_content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-check-circle"></i> Cambiar Contrasena
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                    
+                    <form method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <div class="mb-3">
+                            <label for="nueva_clave" class="form-label">Nueva Contrasena</label>
+                            <input type="password" class="form-control" id="nueva_clave" name="nueva_clave" required>
+                            <div class="form-text">Minimo 6 caracteres</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirmar_clave" class="form-label">Confirmar Nueva Contrasena</label>
+                            <input type="password" class="form-control" id="confirmar_clave" name="confirmar_clave" required>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success">Cambiar Contrasena</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+body {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    min-height: 100vh;
+}
+</style>
+{% endblock %}

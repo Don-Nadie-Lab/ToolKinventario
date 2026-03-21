@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Importar Productos - ToolKinventario{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2><i class="bi bi-upload"></i> Importar Productos</h2>
+        <hr>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label class="form-label">Archivo CSV *</label>
+                        <input type="file" class="form-control" name="archivo" accept=".csv" required>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <h6><i class="bi bi-info-circle"></i> Formato esperado</h6>
+                        <p class="mb-0">El archivo CSV debe tener las siguientes columnas:</p>
+                        <code>codigo, nombre, descripcion, categoria, ubicacion, cantidad, precio, proveedor, fecha_vencimiento, stock_minimo</code>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-upload"></i> Importar
+                    </button>
+                    <a href="{{ url_for('views.lista_productos') }}" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h6><i class="bi bi-lightbulb"></i> Consejos</h6>
+                <ul class="small">
+                    <li>La primera fila debe tener los encabezados</li>
+                    <li>El código es obligatorio y debe ser único</li>
+                    <li>Si la categoría no existe, se creará automáticamente</li>
+                    <li>Los campos numéricos deben estar vacíos si no hay valor</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

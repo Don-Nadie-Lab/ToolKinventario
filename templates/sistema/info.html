@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Información del Sistema - ToolKinventario{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2><i class="bi bi-info-circle"></i> Información del Sistema</h2>
+        <hr>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Estado de Conexion -->
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-wifi"></i> Estado de Conexión</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr>
+                        <td><strong>Modo:</strong></td>
+                        <td>
+                            {% if info.modo == 'online' %}
+                            <span class="badge bg-success"><i class="bi bi-wifi"></i> Online</span>
+                            {% else %}
+                            <span class="badge bg-warning"><i class="bi bi-wifi-off"></i> Offline</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Internet:</strong></td>
+                        <td>
+                            {% if info.conexion_internet %}
+                            <span class="badge bg-success">Conectado</span>
+                            {% else %}
+                            <span class="badge bg-danger">Sin conexión</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Red Local:</strong></td>
+                        <td>{{ 'Sí' if info.es_red_local else 'No' }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>IP Local:</strong></td>
+                        <td><code>{{ info.ip_local }}</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Hostname:</strong></td>
+                        <td><code>{{ info.hostname }}</code></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Base de Datos -->
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-database"></i> Base de Datos</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr>
+                        <td><strong>Estado:</strong></td>
+                        <td>
+                            {% if info.base_datos == 'conectada' %}
+                            <span class="badge bg-success">Conectada</span>
+                            {% else %}
+                            <span class="badge bg-danger">Error</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tipo:</strong></td>
+                        <td>SQLite (Local)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Productos:</strong></td>
+                        <td>{{ info.total_productos }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Movimientos:</strong></td>
+                        <td>{{ info.total_movimientos }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Usuarios activos:</strong></td>
+                        <td>{{ info.usuarios_activos }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Info de Modo Offline -->
+<div class="row">
+    <div class="col-12">
+        <div class="alert alert-info">
+            <h5><i class="bi bi-lightbulb"></i> Acerca del Modo Offline</h5>
+            <p class="mb-0">
+                ToolKinventario funciona <strong>100% offline</strong> ya que utiliza una base de datos SQLite local.
+                No requiere conexión a internet para funcionar. Los datos se almacenan directamente en este equipo.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

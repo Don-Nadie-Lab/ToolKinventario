@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Exportar Productos - ToolKinventario{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2><i class="bi bi-download"></i> Exportar Productos</h2>
+        <hr>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <p>Exporte todos los productos a un archivo CSV para hacer respaldos o migraciones.</p>
+                
+                <form method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-download"></i> Descargar CSV
+                    </button>
+                    <a href="{{ url_for('views.lista_productos') }}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Volver
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h6><i class="bi bi-info-circle"></i> Información</h6>
+                <p class="small mb-0">El archivo incluirá:</p>
+                <ul class="small">
+                    <li>Código</li>
+                    <li>Nombre</li>
+                    <li>Descripción</li>
+                    <li>Categoría</li>
+                    <li>Ubicación</li>
+                    <li>Cantidad</li>
+                    <li>Precio</li>
+                    <li>Proveedor</li>
+                    <li>Fecha de vencimiento</li>
+                    <li>Stock mínimo</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Usuarios - ToolKinventario{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="bi bi-people"></i> Gestión de Usuarios</h1>
+    <a href="{{ url_for('auth.nuevo_usuario') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Nuevo Usuario
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if usuarios %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Usuario</th>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Rol</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for usuario in usuarios %}
+                    <tr>
+                        <td>{{ usuario.id }}</td>
+                        <td><strong>{{ usuario.username }}</strong></td>
+                        <td>{{ usuario.nombre }}</td>
+                        <td>{{ usuario.email }}</td>
+                        <td>
+                            <span class="badge bg-{{ 'danger' if usuario.rol == 'admin' else 'primary' if usuario.rol == 'usuario' else 'warning' }}">
+                                {{ usuario.rol }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if usuario.activo else 'secondary' }}">
+                                {{ 'Activo' if usuario.activo else 'Inactivo' }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('auth.editar_usuario', id=usuario.id) }}" class="btn btn-sm btn-warning">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            {% if usuario.id != current_user.id %}
+                            <form method="POST" action="{{ url_for('auth.eliminar_usuario', id=usuario.id) }}" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar usuario?')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center text-muted py-5">
+            <i class="bi bi-people" style="font-size: 3rem;"></i>
+            <p>No hay usuarios registrados</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

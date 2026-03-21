@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Proveedores - ToolKinventario{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="bi bi-truck"></i> Proveedores</h1>
+    <a href="{{ url_for('views.nuevo_proveedor') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Nuevo Proveedor
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if proveedores %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Contacto</th>
+                        <th>Teléfono</th>
+                        <th>Email</th>
+                        <th>Productos</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prov in proveedores %}
+                    <tr>
+                        <td>{{ prov.id }}</td>
+                        <td><strong>{{ prov.nombre }}</strong></td>
+                        <td>{{ prov.contacto or '-' }}</td>
+                        <td>{{ prov.telefono or '-' }}</td>
+                        <td>{{ prov.email or '-' }}</td>
+                        <td>
+                            <span class="badge bg-primary">{{ prov.productos|length }}</span>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('views.editar_proveedor', id=prov.id) }}" class="btn btn-sm btn-warning">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            {% if prov.productos|length == 0 %}
+                            <form method="POST" action="{{ url_for('views.eliminar_proveedor', id=prov.id) }}" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar proveedor?')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center text-muted py-5">
+            <i class="bi bi-truck" style="font-size: 3rem;"></i>
+            <p>No hay proveedores registrados</p>
+            <a href="{{ url_for('views.nuevo_proveedor') }}" class="btn btn-primary">Crear Primer Proveedor</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

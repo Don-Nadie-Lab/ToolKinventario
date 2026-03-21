@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+
+{% block title %}Escanear Código - ToolKinventario{% endblock %}
+
+{% block content %}
+<!-- Encabezado de la página -->
+<div class="row mb-4">
+    <div class="col">
+        <h1 class="h2">
+            <i class="bi bi-camera"></i>
+            Escanear Código de Barras
+        </h1>
+        <p class="text-muted">
+            Use la cámara para escanear un código de barras
+        </p>
+    </div>
+    <div class="col-auto">
+        <a href="{{ url_for('views.nuevo_movimiento') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+    </div>
+</div>
+
+<!-- Contenedor de la cámara -->
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="bi bi-camera-video"></i>
+                    Cámara
+                </h6>
+            </div>
+            <div class="card-body">
+                <!-- Vista previa de la cámara -->
+                <div class="text-center mb-3">
+                    <video id="video" class="img-fluid border rounded" style="max-height: 400px;"></video>
+                    <canvas id="canvas" style="display: none;"></canvas>
+                </div>
+                
+                <!-- Controles de la cámara -->
+                <div class="d-flex justify-content-center mb-3">
+                    <button id="btnIniciar" class="btn btn-primary me-2">
+                        <i class="bi bi-camera-video"></i> Iniciar Cámara
+                    </button>
+                    <button id="btnCapturar" class="btn btn-success me-2" disabled>
+                        <i class="bi bi-camera"></i> Capturar
+                    </button>
+                    <button id="btnDetener" class="btn btn-danger" disabled>
+                        <i class="bi bi-camera-video-off"></i> Detener
+                    </button>
+                </div>
+                
+                <!-- Formulario para enviar la imagen -->
+                <form id="formEscanear" method="POST" enctype="multipart/form-data" class="d-none">
+                    <input type="hidden" name="imagen" id="imagenInput">
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search"></i> Procesar Código
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- Imagen capturada -->
+                <div id="imagenCapturada" class="text-center mt-3 d-none">
+                    <h6>Imagen Capturada:</h6>
+                    <img id="imgCapturada" class="img-fluid border rounded" style="max-height: 200px;">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Instrucciones -->
+        <div class="card shadow mt-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="bi bi-info-circle"></i>
+                    Instrucciones
+                </h6>
+            </div>
+            <div class="card-body">
+                <ol>
+                    <li>Haga clic en <strong>Iniciar Cámara</strong> para activar la cámara.</li>
+                    <li>Coloque el código de barras frente a la cámara.</li>
+                    <li>Haga clic en <strong>Capturar</strong> cuando el código esté visible.</li>
+                    <li>Haga clic en <strong>Procesar Código</strong> para escanear el código.</li>
+                </ol>
+                <div class="alert alert-info">
+                    <i class="bi bi-lightbulb"></i>
+                    <strong>Consejo:</strong> Asegúrese de que el código de barras esté bien iluminado y enfocado.
+                </div>
+            </div>
+        </div>
+        
+        <!-- Subir imagen alternativa -->
+        <div class="card shadow mt-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="bi bi-upload"></i>
+                    Subir Imagen
+                </h6>
+            </div>
+            <div class="card-body">
+                <p>Si la cámara no funciona, puede subir una imagen del código de barras:</p>
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <input type="file" class="form-control" name="imagen" accept="image/*">
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-upload"></i> Subir y Procesar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Elementos del DOM
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const btnIniciar = document.getElementById('btnIniciar');
+    const btnCapturar = document.getElementById('btnCapturar');
+    const btnDetener = document.getElementById('btnDetener');
+    const formEscanear = document.getElementById('formEscanear');
+    const imagenInput = document.getElementById('imagenInput');
+    const imagenCapturada = document.getElementById('imagenCapturada');
+    const imgCapturada = document.getElementById('imgCapturada');
+    
+    // Variables para la cámara
+    let stream = null;
+    
+    // Función para iniciar la cámara
+    btnIniciar.addEventListener('click', async function() {
+        try {
+            // Solicitar acceso a la cámara
+            stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    facingMode: 'environment',  // Usar cámara trasera si está disponible
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                } 
+            });
+            
+            // Mostrar la vista previa
+            video.srcObject = stream;
+            video.play();
+            
+            // Actualizar botones
+            btnIniciar.disabled = true;
+            btnCapturar.disabled = false;
+            btnDetener.disabled = false;
+            
+        } catch (err) {
+            console.error('Error al acceder a la cámara:', err);
+            alert('No se pudo acceder a la cámara. Verifique los permisos.');
+        }
+    });
+    
+    // Función para capturar imagen
+    btnCapturar.addEventListener('click', function() {
+        if (!stream) return;
+        
+        // Configurar canvas para capturar la imagen
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        // Dibujar el frame actual del video en el canvas
+        const context = canvas.getContext('2d');
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        // Convertir a formato de imagen
+        const imageData = canvas.toDataURL('image/png');
+        
+        // Mostrar la imagen capturada
+        imgCapturada.src = imageData;
+        imagenCapturada.classList.remove('d-none');
+        
+        // Preparar para enviar
+        imagenInput.value = imageData;
+        formEscanear.classList.remove('d-none');
+    });
+    
+    // Función para detener la cámara
+    btnDetener.addEventListener('click', function() {
+        if (stream) {
+            // Detener todos los tracks
+            stream.getTracks().forEach(track => track.stop());
+            stream = null;
+            
+            // Limpiar video
+            video.srcObject = null;
+            
+            // Actualizar botones
+            btnIniciar.disabled = false;
+            btnCapturar.disabled = true;
+            btnDetener.disabled = true;
+        }
+    });
+    
+    // Procesar el formulario
+    formEscanear.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Convertir la imagen base64 a un archivo
+        const base64Image = imagenInput.value;
+        const blob = dataURItoBlob(base64Image);
+        const file = new File([blob], 'captura.png', { type: 'image/png' });
+        
+        // Crear un FormData y agregar el archivo
+        const formData = new FormData();
+        formData.append('imagen', file);
+        
+        // Enviar la solicitud
+        fetch("{{ url_for('views.escanear_codigo') }}", {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            // Redirigir a la página que devuelve el servidor
+            window.location.href = response.url;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error al procesar la imagen');
+        });
+    });
+    
+    // Función para convertir base64 a Blob
+    function dataURItoBlob(dataURI) {
+        const byteString = atob(dataURI.split(',')[1]);
+        const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+        
+        for (let i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+        }
+        
+        return new Blob([ab], { type: mimeString });
+    }
+});
+</script>
+{% endblock %}

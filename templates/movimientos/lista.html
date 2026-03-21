@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Movimientos - ToolKinventario{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2"><i class="bi bi-arrow-left-right"></i> Movimientos de Inventario</h1>
+    <div class="btn-group" role="group">
+        <a href="{{ url_for('views.nuevo_movimiento') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Nuevo Movimiento
+        </a>
+        <a href="{{ url_for('views.escanear_codigo') }}" class="btn btn-success">
+            <i class="bi bi-camera"></i> Escanear
+        </a>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Tipo</label>
+                <select class="form-select" name="tipo">
+                    <option value="">Todos</option>
+                    <option value="entrada" {% if tipo == 'entrada' %}selected{% endif %}>Entrada</option>
+                    <option value="salida" {% if tipo == 'salida' %}selected{% endif %}>Salida</option>
+                    <option value="ajuste" {% if tipo == 'ajuste' %}selected{% endif %}>Ajuste</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Producto</label>
+                <select class="form-select" name="producto_id">
+                    <option value="">Todos</option>
+                    {% for p in productos %}
+                    <option value="{{ p.id }}" {% if producto_id == p.id %}selected{% endif %}>
+                        {{ p.nombre }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Desde</label>
+                <input type="date" class="form-control" name="fecha_desde" value="{{ fecha_desde or '' }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Hasta</label>
+                <input type="date" class="form-control" name="fecha_hasta" value="{{ fecha_hasta or '' }}">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-search"></i> Filtrar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Lista de Movimientos -->
+<div class="card">
+    <div class="card-body">
+        {% if movimientos.items %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Producto</th>
+                        <th>Tipo</th>
+                        <th>Cantidad</th>
+                        <th>Stock Anterior</th>
+                        <th>Stock Nuevo</th>
+                        <th>Usuario</th>
+                        <th>Referencia</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in movimientos.items %}
+                    <tr>
+                        <td>{{ m.fecha.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td>
+                            <a href="{{ url_for('views.ver_producto', id=m.producto_id) }}">
+                                {{ m.producto.nombre }}
+                            </a>
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if m.tipo == 'entrada' else 'danger' if m.tipo == 'salida' else 'info' }}">
+                                {{ m.tipo.title() }}
+                            </span>
+                        </td>
+                        <td>{{ m.cantidad }}</td>
+                        <td>{{ m.cantidad_anterior }}</td>
+                        <td>{{ m.cantidad_nueva }}</td>
+                        <td>{{ m.usuario.nombre }}</td>
+                        <td>{{ m.referencia or '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación -->
+        {% if movimientos.pages > 1 %}
+        <nav>
+            <ul class="pagination">
+                {% if movimientos.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('views.lista_movimientos', page=movimientos.prev_num, tipo=tipo, producto_id=producto_id, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta) }}">Anterior</a>
+                </li>
+                {% endif %}
+                
+                {% for page_num in movements.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                    {% if page_num %}
+                        <li class="page-item {% if page_num == movimientos.page %}active{% endif %}">
+                            <a class="page-link" href="{{ url_for('views.lista_movimientos', page=page_num, tipo=tipo, producto_id=producto_id, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta) }}">{{ page_num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if movimientos.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('views.lista_movimientos', page=movimientos.next_num, tipo=tipo, producto_id=producto_id, fecha_desde=fecha_desde, fecha_hasta=fecha_hasta) }}">Siguiente</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <div class="text-center text-muted py-5">
+            <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+            <p>No hay movimientos registrados</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

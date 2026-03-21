@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Configuración - ToolKinventario{% endblock %}
+
+{% block page_content %}
+<div class="row fade-in">
+    <div class="col-md-12 mb-4">
+        <h2 class="h4 text-white">
+            <img src="{{ url_for('static', filename='icon.png') }}" alt="Logo" class="me-2" style="max-height: 32px;">
+            <i class="bi bi-gear me-2"></i>Configuración del Sistema
+        </h2>
+        <p class="text-muted small">Administre los parámetros del sistema y realice copias de seguridad.</p>
+    </div>
+
+    <!-- Respaldo y Restauración de Base de Datos -->
+    <div class="col-md-6 mb-4">
+        <div class="card glass-card h-100">
+            <div class="card-body">
+                <h5 class="card-title text-success">
+                    <i class="bi bi-database-fill-arrow-up me-2"></i>Respaldar Base de Datos
+                </h5>
+                <hr class="opacity-25">
+                <p class="small text-muted mb-4">
+                    Exporte toda su base de datos a un archivo JSON. Este archivo contiene todos los 
+                    productos, categorías, movimientos, usuarios y configuraciones.
+                </p>
+                
+                <div class="mb-3">
+                    <a href="{{ url_for('views.exportar_db') }}" class="btn btn-success w-100">
+                        <i class="bi bi-download me-2"></i>Exportar Base de Datos
+                    </a>
+                </div>
+                
+                <div class="alert alert-dark border-secondary small mb-0">
+                    <i class="bi bi-info-circle me-1"></i>
+                    <strong>Formato:</strong> JSON (legible y portable)<br>
+                    <strong>Contenido:</strong> Todos los datos del sistema
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card glass-card h-100">
+            <div class="card-body">
+                <h5 class="card-title text-warning">
+                    <i class="bi bi-database-fill-arrow-down me-2"></i>Restaurar Base de Datos
+                </h5>
+                <hr class="opacity-25">
+                <p class="small text-muted mb-4">
+                    Importe datos desde un archivo JSON previamente exportado. 
+                    <strong class="text-warning">Los datos existentes NO se eliminan</strong>, 
+                    solo se agregan los nuevos registros.
+                </p>
+                
+                <div class="mb-3">
+                    <a href="{{ url_for('views.importar_db') }}" class="btn btn-warning w-100">
+                        <i class="bi bi-upload me-2"></i>Importar Base de Datos
+                    </a>
+                </div>
+                
+                <div class="alert alert-dark border-secondary small mb-0">
+                    <i class="bi bi-shield-check me-1"></i>
+                    <strong>Seguridad:</strong> Se crea backup automático<br>
+                    <strong>Precaución:</strong> Verifique el archivo antes de importar
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuración General -->
+    <div class="col-md-8 mx-auto">
+        <div class="card glass-card">
+            <div class="card-body">
+                <form action="{{ url_for('views.configuracion') }}" method="POST">
+                    <h5 class="card-title text-primary">
+                        <i class="bi bi-building me-2"></i>Configuración General
+                    </h5>
+                    <hr class="opacity-25">
+                    
+                    <div class="mb-4">
+                        <label for="nombre_almacen" class="form-label small text-muted">Nombre del Almacén</label>
+                        <input type="text" class="form-control bg-dark border-secondary text-white" id="nombre_almacen" name="nombre_almacen" 
+                               value="{{ configs.nombre_almacen or 'Almacén Central' }}" required>
+                        <div class="form-text small text-muted">Aparecerá en reportes y encabezados.</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="stock_alerta" class="form-label small text-muted">Alerta de Stock Global</label>
+                        <input type="number" class="form-control bg-dark border-secondary text-white" id="stock_alerta" name="stock_alerta" 
+                               value="{{ configs.stock_alerta or '5' }}" required min="0">
+                        <div class="form-text small text-muted">Define la cantidad por defecto para alertas de stock bajo.</div>
+                    </div>
+
+                    <h5 class="card-title text-secondary mt-5">
+                        <i class="bi bi-display me-2"></i>Preferencias de Interfaz
+                    </h5>
+                    <hr class="opacity-25">
+                    
+                    <div class="mb-4 d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="mb-0 small fw-bold text-white">Modo Glassmorphism</p>
+                            <small class="text-muted">Desactivar para mayor rendimiento en dispositivos viejos.</small>
+                        </div>
+                        <div class="form-check form-switch fs-4">
+                            <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault" checked disabled>
+                        </div>
+                    </div>
+
+                    <hr class="opacity-25 my-4">
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-save me-2"></i>Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
