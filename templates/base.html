@@ -4,183 +4,258 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}ToolKinventario{% endblock %}</title>
-    
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-    
-    <!-- Estilos personalizados -->
-    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
-    
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='icon.png') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Premium Theme Integration -->
+    <link href="{{ url_for('static', filename='css/premium.css') }}" rel="stylesheet">
     {% block extra_css %}{% endblock %}
 </head>
-<body>
-    <!-- Navegación principal -->
+<body class="bg-dark text-white">
     {% if current_user.is_authenticated %}
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container-fluid">
-            <!-- Logo y título -->
-            <a class="navbar-brand" href="{{ url_for('views.dashboard') }}">
-                <i class="bi bi-tools"></i>
-                ToolKinventario
-            </a>
-            
-            <!-- Botón para móvil -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <!-- Menú de navegación -->
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <!-- Dashboard -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('views.dashboard') }}">
-                            <i class="bi bi-speedometer2"></i> Dashboard
-                        </a>
-                    </li>
-                    
-                    <!-- Productos -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-box"></i> Productos
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ url_for('views.lista_productos') }}">
-                                <i class="bi bi-list"></i> Lista de Productos
-                            </a></li>
-                            {% if not current_user.is_maestro_carga() %}
-                            <li><a class="dropdown-item" href="{{ url_for('views.nuevo_producto') }}">
-                                <i class="bi bi-plus-circle"></i> Nuevo Producto
-                            </a></li>
-                            {% endif %}
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ url_for('views.lista_categorias') }}">
-                                <i class="bi bi-tags"></i> Categorías
-                            </a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('views.lista_proveedores') }}">
-                                <i class="bi bi-truck"></i> Proveedores
-                            </a></li>
-                        </ul>
-                    </li>
-                    
-                    <!-- Movimientos -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-arrow-left-right"></i> Movimientos
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ url_for('views.lista_movimientos') }}">
-                                <i class="bi bi-list"></i> Historial
-                            </a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('views.nuevo_movimiento') }}">
-                                <i class="bi bi-plus-circle"></i> Nuevo Movimiento
-                            </a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ url_for('views.escanear_codigo') }}">
-                                <i class="bi bi-camera"></i> Escanear Código
-                            </a></li>
-                        </ul>
-                    </li>
-                    
-                    <!-- Reportes -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-graph-up"></i> Reportes
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ url_for('views.exportar_productos') }}">
-                                <i class="bi bi-download"></i> Exportar Productos
-                            </a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('views.importar_productos') }}">
-                                <i class="bi bi-upload"></i> Importar Productos
-                            </a></li>
-                        </ul>
-                    </li>
-                    
-                    <!-- Administración (solo para admins) -->
-                    {% if current_user.is_admin() %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-gear"></i> Administración
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ url_for('auth.lista_usuarios') }}">
-                                <i class="bi bi-people"></i> Usuarios
-                            </a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('auth.log_auditoria') }}">
-                                <i class="bi bi-shield-check"></i> Auditoría
-                            </a></li>
-                        </ul>
-                    </li>
+    <div class="container-fluid p-0">
+        <div class="d-flex">
+            <!-- Sidebar Fija Principal -->
+            <nav class="sidebar-fixed d-flex flex-column" id="sidebarMenu">
+                <div class="sidebar-header p-4 text-center">
+                    <!-- Logo de la empresa -->
+                    <div class="mb-3">
+                        <img src="{{ url_for('static', filename='icon.png') }}" alt="ToolKinventario" class="img-fluid" style="max-height: 80px; max-width: 80px;">
+                    </div>
+                    <h5 class="navbar-brand m-0" style="font-size: 1.1rem; font-weight: 700; letter-spacing: 0.5px;">ToolKinventario</h5>
+                    <small class="text-muted" style="font-size: 0.65rem;">Sistema de Gestión</small>
+                    {% if current_user.rol == 'admin' %}
+                    <div class="badge bg-primary bg-opacity-25 text-primary border border-primary border-opacity-25 mt-2" style="font-size: 0.65rem;">ADMIN PANEL</div>
+                    {% else %}
+                    <div class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-25 mt-2" style="font-size: 0.65rem;">USUARIO</div>
                     {% endif %}
-                </ul>
-                
-                <!-- Menú de usuario -->
-                <ul class="navbar-nav">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-person-circle"></i>
-                            {{ current_user.nombre }}
-                            <span class="badge bg-secondary">{{ current_user.rol }}</span>
+                </div>
+
+                <hr class="mx-3 opacity-25">
+
+                <div class="sidebar-content flex-grow-1 overflow-auto py-2">
+                    <ul class="nav flex-column px-2 sidebar">
+                        <li class="nav-item">
+                            <a class="nav-link {{ 'active' if request.endpoint == 'views.dashboard' else '' }}" href="{{ url_for('views.dashboard') }}">
+                                <i class="bi bi-grid-1x2"></i> Dashboard
+                            </a>
+                        </li>
+                        
+                        <li class="nav-item mt-3 mb-1">
+                            <small class="sidebar-heading px-3 text-muted text-uppercase" style="font-size: 0.65rem; letter-spacing: 1px;">Almacén</small>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ 'active' if 'producto' in request.endpoint else '' }}" href="{{ url_for('views.lista_productos') }}">
+                                <i class="bi bi-box-seam"></i> Inventario Stock
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ 'active' if 'repuesto' in request.endpoint or 'articulo' in request.endpoint else '' }}" href="{{ url_for('views.lista_repuestos') }}">
+                                <i class="bi bi-boxes"></i> Artículos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ 'active' if request.endpoint == 'views.lista_categorias' else '' }}" href="{{ url_for('views.lista_categorias') }}">
+                                <i class="bi bi-tags"></i> Categorías
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ 'active' if request.endpoint == 'views.lista_proveedores' else '' }}" href="{{ url_for('views.lista_proveedores') }}">
+                                <i class="bi bi-truck"></i> Proveedores
+                            </a>
+                        </li>
+
+                        <li class="nav-item mt-3 mb-1">
+                            <small class="sidebar-heading px-3 text-muted text-uppercase" style="font-size: 0.65rem; letter-spacing: 1px;">Control Flujo</small>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ 'active' if request.endpoint == 'views.lista_movimientos' else '' }}" href="{{ url_for('views.lista_movimientos') }}">
+                                <i class="bi bi-journal-text"></i> Movimientos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ 'active' if request.endpoint == 'views.nuevo_movimiento' else '' }}" href="{{ url_for('views.nuevo_movimiento') }}">
+                                <i class="bi bi-arrow-down-up"></i> Entradas / Salidas
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ 'active' if request.endpoint == 'views.escanear_codigo' else '' }}" href="{{ url_for('views.escanear_codigo') }}">
+                                <i class="bi bi-qr-code-scan"></i> Scanner Pro
+                            </a>
+                        </li>
+
+                        {% if current_user.rol == 'admin' %}
+                        <li class="nav-item mt-3 mb-1">
+                            <small class="sidebar-heading px-3 text-muted text-uppercase" style="font-size: 0.65rem; letter-spacing: 1px;">Gestión Sistema</small>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ 'active' if request.endpoint == 'views.configuracion' else '' }}" href="{{ url_for('views.configuracion') }}">
+                                <i class="bi bi-gear"></i> Configuración
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ 'active' if request.endpoint == 'views.mantenimiento' else '' }}" href="{{ url_for('views.mantenimiento') }}">
+                                <i class="bi bi-database-gear"></i> Mantenimiento
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ 'active' if 'usuario' in request.endpoint else '' }}" href="{{ url_for('auth.lista_usuarios') }}">
+                                <i class="bi bi-people"></i> Usuarios
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ 'active' if request.endpoint == 'auth.log_auditoria' else '' }}" href="{{ url_for('auth.log_auditoria') }}">
+                                <i class="bi bi-shield-lock"></i> Auditoría
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                        <!-- Botón Salir - Sale de la aplicación completa -->
+                        <li class="nav-item mt-3 mb-4">
+                            <a class="nav-link text-danger border border-danger border-opacity-10 rounded mx-3 py-2" href="#" onclick="salirApp(); return false;" style="background: rgba(220, 53, 69, 0.05);">
+                                <i class="bi bi-power"></i> Salir
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="sidebar-footer mt-auto p-3">
+                    <div class="dropdown">
+                        <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle p-2 rounded" id="userMenu" data-bs-toggle="dropdown" aria-expanded="false" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
+                            <i class="bi bi-person-circle fs-5 me-2 text-primary"></i>
+                            <div class="me-auto text-truncate" style="max-width: 110px;">
+                                <strong class="small">{{ current_user.nombre or current_user.username }}</strong>
+                            </div>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="{{ url_for('auth.perfil') }}">
-                                <i class="bi bi-person"></i> Mi Perfil
-                            </a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">
-                                <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
-                            </a></li>
+                        <ul class="dropdown-menu dropdown-menu-dark shadow border-0" aria-labelledby="userMenu" style="background: #1e1e2d; border: 1px solid rgba(255,255,255,0.1);">
+                            <li><a class="dropdown-item" href="{{ url_for('auth.perfil') }}"><i class="bi bi-person me-2"></i> Perfil</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('views.info_sistema') }}"><i class="bi bi-info-circle me-2"></i> Info Sistema</a></li>
+                            <li><hr class="dropdown-divider opacity-10"></li>
+                            <li><a class="dropdown-item text-danger" href="#" onclick="salirApp(); return false;"><i class="bi bi-power me-2"></i> Salir</a></li>
                         </ul>
-                    </li>
-                </ul>
+                    </div>
+                </div>
+            </nav>
+            
+            <!-- Contenido Principal -->
+            <main class="main-content-fixed w-100">
+                <div class="p-4 fade-in">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show mb-4" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                    
+                    {% block page_content %}{% endblock %}
+                    {% block content %}{% endblock %}
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- Modal de confirmación para salir -->
+    <div class="modal fade" id="modalSalir" tabindex="-1" aria-labelledby="modalSalirLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background: #1e1e2d; border: 1px solid rgba(255,255,255,0.1);">
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title text-white" id="modalSalirLabel">
+                        <i class="bi bi-power text-danger me-2"></i>Salir de ToolKinventario
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-white-50">¿Está seguro que desea salir de la aplicación?</p>
+                    <hr class="border-secondary">
+                    <p class="small text-muted mb-2">Opciones de cierre:</p>
+                </div>
+                <div class="modal-footer border-secondary flex-column">
+                    <div class="w-100 mb-2">
+                        <button type="button" class="btn btn-secondary w-100" onclick="confirmarSalir()">
+                            <i class="bi bi-person-x me-1"></i> Cerrar Sesion
+                        </button>
+                        <small class="text-muted d-block text-center mt-1">Solo cierra tu sesion</small>
+                    </div>
+                    <div class="w-100">
+                        <button type="button" class="btn btn-danger w-100" onclick="apagarSistema()">
+                            <i class="bi bi-power me-1"></i> Apagar Sistema
+                        </button>
+                        <small class="text-muted d-block text-center mt-1">Cierra sesion y detiene el servidor</small>
+                    </div>
+                    <div class="w-100 mt-2">
+                        <button type="button" class="btn btn-outline-secondary w-100" data-bs-dismiss="modal">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
-    </nav>
+    </div>
+    
+    {% else %}
+    <div class="container-fluid min-vh-100 d-flex align-items-center justify-content-center p-0">
+        <div class="w-100" style="max-width: 1200px;">
+            {% block public_content %}{% endblock %}
+        </div>
+    </div>
     {% endif %}
     
-    <!-- Contenido principal -->
-    <main class="container-fluid mt-3">
-        <!-- Mensajes flash -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Script para manejar la salida de la aplicación -->
+    <script>
+        // Variable para evitar múltiples clics
+        var saliendo = false;
         
-        <!-- Contenido de la página -->
-        {% block content %}{% endblock %}
-    </main>
-    
-    <!-- Footer -->
-    <footer class="bg-light text-center text-muted py-3 mt-5">
-        <div class="container">
-            <p class="mb-0">
-                <i class="bi bi-tools"></i>
-                ToolKinventario v1.0 - Sistema de Inventario para Raspberry Pi
-                <br>
-                <small>Desarrollado por <strong>Don Nadie Apps</strong></small>
-            </p>
-        </div>
-    </footer>
-    
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- jQuery (para funcionalidades adicionales) -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    
-    <!-- Scripts personalizados -->
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
-    
+        // Función principal para salir - muestra el modal
+        function salirApp() {
+            if (saliendo) return;
+            saliendo = true;
+            
+            var modal = new bootstrap.Modal(document.getElementById('modalSalir'));
+            modal.show();
+            
+            // Resetear la variable después de cerrar el modal
+            document.getElementById('modalSalir').addEventListener('hidden.bs.modal', function() {
+                saliendo = false;
+            });
+        }
+        
+        // Función para confirmar salida - llama al logout y luego cierra la ventana
+        function confirmarSalir() {
+            // Primero cerramos la sesión
+            fetch('{{ url_for("auth.logout") }}', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            }).then(function() {
+                // Cerrar la ventana del navegador
+                setTimeout(function() {
+                    window.open('', '_self', '');
+                    window.close();
+                }, 300);
+            }).catch(function() {
+                window.location.href = '{{ url_for("auth.login") }}';
+            });
+        }
+        
+        // Función para apagar el sistema completo
+        function apagarSistema() {
+            // Cerrar modal
+            var modalEl = document.getElementById('modalSalir');
+            var modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+            
+            // Redirigir a la pagina de logout + shutdown
+            window.location.href = '{{ url_for("auth.logout_shutdown") }}';
+        }
+    </script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>
+

@@ -2,7 +2,7 @@
 
 {% block title %}Iniciar Sesión - ToolKinventario{% endblock %}
 
-{% block content %}
+{% block public_content %}
 <div class="row justify-content-center">
     <div class="col-md-6 col-lg-4">
         <div class="card shadow">
@@ -15,6 +15,7 @@
             </div>
             <div class="card-body">
                 <form method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="mb-3">
                         <label for="username" class="form-label">
                             <i class="bi bi-person"></i> Usuario
@@ -31,51 +32,36 @@
                                id="password" name="password" required>
                     </div>
                     
-                    <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" 
-                               id="remember" name="remember">
-                        <label class="form-check-label" for="remember">
-                            Recordar sesión
+                    {% if requiere_clave %}
+                    <div class="mb-3">
+                        <label for="clave_seguridad" class="form-label">
+                            <i class="bi bi-shield-lock"></i> Clave de Seguridad
                         </label>
+                        <input type="password" class="form-control form-control-lg" 
+                               id="clave_seguridad" name="clave_seguridad" required>
                     </div>
+                    {% endif %}
                     
                     <button type="submit" class="btn btn-primary btn-lg w-100">
                         <i class="bi bi-box-arrow-in-right"></i>
                         Iniciar Sesión
                     </button>
+                    
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('auth.recuperar_clave') }}"><i class="bi bi-question-circle"></i> Olvido su contrasena?</a>
+                    </div>
                 </form>
             </div>
             <div class="card-footer text-center text-muted">
                 <small>
-                    <i class="bi bi-shield-check"></i>
-                    Acceso seguro con autenticación
+                    <strong>Credenciales por defecto:</strong><br>
+                    Usuario: admin | Contraseña: admin123
                 </small>
-            </div>
-        </div>
-        
-        <!-- Información del sistema -->
-        <div class="card mt-3">
-            <div class="card-body text-center">
-                <h6 class="card-title">
-                    <i class="bi bi-info-circle"></i>
-                    Información del Sistema
-                </h6>
-                <p class="card-text small text-muted">
-                    <strong>Roles disponibles:</strong><br>
-                    <span class="badge bg-danger">Admin</span> Control total del sistema<br>
-                    <span class="badge bg-success">Usuario</span> Operaciones básicas<br>
-                    <span class="badge bg-warning">Maestro Carga</span> Cargas masivas
-                </p>
-                <p class="card-text small">
-                    <i class="bi bi-cpu"></i>
-                    Optimizado para Raspberry Pi
-                </p>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Estilos adicionales para la página de login -->
 <style>
 body {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -83,28 +69,6 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
-}
-
-.card {
-    border: none;
-    border-radius: 15px;
-}
-
-.card-header {
-    border-radius: 15px 15px 0 0 !important;
-}
-
-.form-control-lg {
-    border-radius: 10px;
-}
-
-.btn-lg {
-    border-radius: 10px;
-    padding: 12px;
-}
-
-footer {
-    margin-top: auto;
 }
 </style>
 {% endblock %}
