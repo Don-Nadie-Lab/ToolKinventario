@@ -17,10 +17,10 @@ Werkzeug==2.3.7
 bcrypt==4.0.1
 
 # Procesamiento de imagenes y codigos de barras
-opencv-python>=4.8.1.78
+opencv-python==4.8.1.78
 pyzbar==0.1.9
 Pillow>=10.0.1
-numpy>=1.26.0
+numpy<2.0
 
 # Utilidades para archivos y datos
 python-csv==0.0.13
