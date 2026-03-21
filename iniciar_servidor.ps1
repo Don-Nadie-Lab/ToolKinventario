@@ -5,8 +5,9 @@
 
 $ErrorActionPreference = "SilentlyContinue"
 
-# Detener cualquier instancia anterior del servidor
 $port = 5050
+
+# Detener cualquier instancia anterior del servidor
 $connection = Get-NetTCPConnection -LocalPort $port -ErrorAction SilentlyContinue
 if ($connection) {
     $processId = $connection.OwningProcess
@@ -30,28 +31,52 @@ if (-not (Test-Path $runPyPath)) {
     exit 1
 }
 
-# Iniciar servidor OCULTO (sin ventana)
-$pythonPath = "python"
-$process = Start-Process -FilePath $pythonPath -ArgumentList $runPyPath -PassThru -WindowStyle Hidden
+# Configurar para ocultar ventana
+$startupinfo = New-Object System.Diagnostics.ProcessStartInfo
+$startupinfo.FileName = "python"
+$startupinfo.Arguments = "`"$runPyPath`""
+$startupinfo.WorkingDirectory = $scriptDir
+$startupinfo.UseShellExecute = $false
+$startupinfo.CreateNoWindow = $true
+$startupinfo.RedirectStandardOutput = $false
+$startupinfo.RedirectStandardError = $false
 
-if (-not $process) {
+$process = New-Object System.Diagnostics.Process
+$process.StartInfo = $startupinfo
+
+try {
+    $process.Start() | Out-Null
+} catch {
     exit 1
 }
 
 # Esperar a que el servidor este listo
-$maxWait = 15
+$maxWait = 20
 $waited = 0
+$serverReady = $false
 
 while ($waited -lt $maxWait) {
+    Start-Sleep -Seconds 1
+    
     $conn = Get-NetTCPConnection -LocalPort $port -ErrorAction SilentlyContinue
     if ($conn -and $conn.State -eq "Listen") {
+        $serverReady = $true
         break
     }
-    Start-Sleep -Seconds 1
+    
+    # Verificar si el proceso sigue activo
+    if ($process.HasExited) {
+        break
+    }
+    
     $waited++
 }
 
-# Abrir navegador (esto muestra una ventana pero es intencional)
+if (-not $serverReady) {
+    exit 1
+}
+
+# Abrir navegador
 Start-Process -FilePath "http://127.0.0.1:$port"
 
 exit 0
