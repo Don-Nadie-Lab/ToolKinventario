@@ -1,0 +1,379 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - ToolKinventario{% endblock %}
+
+{% block content %}
+<!-- Encabezado del dashboard -->
+<div class="row mb-4">
+    <div class="col">
+        <h1 class="h2">
+            <i class="bi bi-speedometer2"></i>
+            Dashboard de Inventario
+        </h1>
+        <p class="text-muted">
+            Bienvenido, {{ current_user.nombre }}
+            <span class="badge bg-{{ 'danger' if current_user.is_admin() else 'success' if current_user.rol == 'usuario' else 'warning' }}">
+                {{ current_user.rol.title() }}
+            </span>
+        </p>
+    </div>
+    <div class="col-auto">
+        <div class="btn-group" role="group">
+            <a href="{{ url_for('views.nuevo_movimiento') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Nuevo Movimiento
+            </a>
+            <a href="{{ url_for('views.escanear_codigo') }}" class="btn btn-success">
+                <i class="bi bi-camera"></i> Escanear
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Tarjetas de estadísticas -->
+<div class="row mb-4">
+    <!-- Total de productos -->
+    <div class="col-xl-3 col-md-6 mb-3">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Total Productos
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            {{ total_productos }}
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-box text-primary" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Total de categorías -->
+    <div class="col-xl-3 col-md-6 mb-3">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Categorías
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            {{ total_categorias }}
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-tags text-success" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Total de movimientos -->
+    <div class="col-xl-3 col-md-6 mb-3">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            Movimientos
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            {{ total_movimientos }}
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-arrow-left-right text-info" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Productos con stock bajo -->
+    <div class="col-xl-3 col-md-6 mb-3">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Stock Bajo
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            {{ productos_stock_bajo|length }}
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="bi bi-exclamation-triangle text-warning" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Contenido principal en dos columnas -->
+<div class="row">
+    <!-- Columna izquierda -->
+    <div class="col-lg-8">
+        <!-- Productos con stock bajo -->
+        {% if productos_stock_bajo %}
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-warning">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    Productos con Stock Bajo
+                </h6>
+                <a href="{{ url_for('views.lista_productos', stock_bajo=1) }}" class="btn btn-sm btn-warning">
+                    Ver Todos
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Producto</th>
+                                <th>Stock Actual</th>
+                                <th>Stock Mínimo</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for producto in productos_stock_bajo %}
+                            <tr>
+                                <td><code>{{ producto.codigo }}</code></td>
+                                <td>{{ producto.nombre }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 'danger' if producto.cantidad == 0 else 'warning' }}">
+                                        {{ producto.cantidad }}
+                                    </span>
+                                </td>
+                                <td>{{ producto.stock_minimo }}</td>
+                                <td>
+                                    <a href="{{ url_for('views.nuevo_movimiento', codigo=producto.codigo) }}" 
+                                       class="btn btn-sm btn-primary">
+                                        <i class="bi bi-plus"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Últimos movimientos -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="bi bi-clock-history"></i>
+                    Últimos Movimientos
+                </h6>
+                <a href="{{ url_for('views.lista_movimientos') }}" class="btn btn-sm btn-primary">
+                    Ver Historial
+                </a>
+            </div>
+            <div class="card-body">
+                {% if ultimos_movimientos %}
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Producto</th>
+                                <th>Tipo</th>
+                                <th>Cantidad</th>
+                                <th>Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for movimiento in ultimos_movimientos %}
+                            <tr>
+                                <td>
+                                    <small>{{ movimiento.fecha.strftime('%d/%m %H:%M') }}</small>
+                                </td>
+                                <td>{{ movimiento.producto.nombre }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if movimiento.tipo == 'entrada' else 'danger' if movimiento.tipo == 'salida' else 'info' }}">
+                                        {{ movimiento.tipo.title() }}
+                                    </span>
+                                </td>
+                                <td>{{ movimiento.cantidad }}</td>
+                                <td>
+                                    <small>{{ movimiento.usuario.nombre }}</small>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center text-muted py-4">
+                    <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                    <p>No hay movimientos registrados</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Columna derecha -->
+    <div class="col-lg-4">
+        <!-- Productos más movidos -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-success">
+                    <i class="bi bi-graph-up"></i>
+                    Productos Más Activos
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if productos_mas_movidos %}
+                <div class="chart-bar">
+                    <canvas id="productosActivosChart"></canvas>
+                </div>
+                {% else %}
+                <div class="text-center text-muted py-4">
+                    <i class="bi bi-bar-chart" style="font-size: 3rem;"></i>
+                    <p>No hay datos suficientes</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Accesos rápidos -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="bi bi-lightning"></i>
+                    Accesos Rápidos
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6 mb-3">
+                        <a href="{{ url_for('views.nuevo_producto') }}" class="btn btn-outline-primary btn-block py-3">
+                            <i class="bi bi-plus-circle" style="font-size: 1.5rem;"></i>
+                            <div>Nuevo Producto</div>
+                        </a>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <a href="{{ url_for('views.nuevo_movimiento') }}" class="btn btn-outline-success btn-block py-3">
+                            <i class="bi bi-arrow-left-right" style="font-size: 1.5rem;"></i>
+                            <div>Movimiento</div>
+                        </a>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <a href="{{ url_for('views.escanear_codigo') }}" class="btn btn-outline-info btn-block py-3">
+                            <i class="bi bi-camera" style="font-size: 1.5rem;"></i>
+                            <div>Escanear</div>
+                        </a>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <a href="{{ url_for('views.exportar_productos') }}" class="btn btn-outline-secondary btn-block py-3">
+                            <i class="bi bi-download" style="font-size: 1.5rem;"></i>
+                            <div>Exportar</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js para gráficos -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// Gráfico de productos más activos
+{% if productos_mas_movidos %}
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('productosActivosChart').getContext('2d');
+    
+    const productosChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: [
+                {% for producto, total in productos_mas_movidos %}
+                '{{ producto.nombre|truncate(15) }}',
+                {% endfor %}
+            ],
+            datasets: [{
+                label: 'Movimientos',
+                data: [
+                    {% for producto, total in productos_mas_movidos %}
+                    {{ total }},
+                    {% endfor %}
+                ],
+                backgroundColor: [
+                    'rgba(78, 115, 223, 0.7)',
+                    'rgba(28, 200, 138, 0.7)',
+                    'rgba(54, 185, 204, 0.7)',
+                    'rgba(246, 194, 62, 0.7)',
+                    'rgba(231, 74, 59, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(78, 115, 223, 1)',
+                    'rgba(28, 200, 138, 1)',
+                    'rgba(54, 185, 204, 1)',
+                    'rgba(246, 194, 62, 1)',
+                    'rgba(231, 74, 59, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+});
+{% endif %}
+</script>
+
+<!-- Estilos adicionales para el dashboard -->
+<style>
+.border-left-primary {
+    border-left: 0.25rem solid #4e73df !important;
+}
+.border-left-success {
+    border-left: 0.25rem solid #1cc88a !important;
+}
+.border-left-info {
+    border-left: 0.25rem solid #36b9cc !important;
+}
+.border-left-warning {
+    border-left: 0.25rem solid #f6c23e !important;
+}
+.chart-bar {
+    position: relative;
+    height: 300px;
+}
+.btn-block {
+    display: block;
+    width: 100%;
+}
+</style>
+{% endblock %}
