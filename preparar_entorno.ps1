@@ -150,9 +150,21 @@ if (-not $pipCmd) {
 Write-Step "Actualizando pip..."
 python -m pip install --upgrade pip 2>$null | Out-Null
 
-# Instalar dependencias
+# Instalar dependencias criticas con versiones compatibles PRIMERO
 Write-Host ""
-Write-Step "Instalando dependencias de requirements.txt..."
+Write-Step "Instalando dependencias criticas (NumPy + OpenCV)..."
+
+try {
+    pip uninstall numpy opencv-python -y 2>$null | Out-Null
+    pip install numpy==1.26.4 opencv-python==4.8.1.78 --quiet
+    Write-Success "NumPy 1.26.4 y OpenCV 4.8.1.78 instalados"
+} catch {
+    Write-Warn "Advertencia en dependencias criticas, continuando..."
+}
+
+# Instalar resto de dependencias
+Write-Host ""
+Write-Step "Instalando resto de dependencias de requirements.txt..."
 
 try {
     pip install -r $requirementsFile --quiet
@@ -190,8 +202,8 @@ Write-Host ""
 Write-Host "Para iniciar la aplicacion:" -ForegroundColor White
 Write-Host "  python run.py" -ForegroundColor Yellow
 Write-Host ""
-Write-Host "O usar el lanzador:" -ForegroundColor White
-Write-Host "  python installer/lanzador_optimizado.py" -ForegroundColor Yellow
+Write-Host "O usar el acceso directo:" -ForegroundColor White
+Write-Host "  .\crear_accesos_directos.ps1" -ForegroundColor Yellow
 Write-Host ""
 Write-Host "Usuario por defecto: admin" -ForegroundColor White
 Write-Host "Contrasena por defecto: admin123" -ForegroundColor White
